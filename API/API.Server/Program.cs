@@ -1,3 +1,5 @@
+using DAL;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,6 +17,14 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+// שליפת מחרוזת החיבור ואתחול בסיס הנתונים
+string connStr = builder.Configuration.GetConnectionString("DefaultConnection")!;
+var dbInitializer = new DatabaseInitializer(connStr);
+dbInitializer.Initialize();
+
+// רישום שכבת ה-DAL להזרקה (Dependency Injection)
+builder.Services.AddScoped<userDal>(sp => new userDal(connStr));
 
 var app = builder.Build();
 

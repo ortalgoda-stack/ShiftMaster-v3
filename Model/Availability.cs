@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System;
 
-namespace ShiftMaster.DAL
+namespace Model
 {
     public class Availability
     {

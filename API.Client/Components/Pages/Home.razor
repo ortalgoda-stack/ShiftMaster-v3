@@ -1,4 +1,5 @@
-﻿@page "/"
+﻿@using Model
+@page "/"
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 
@@ -15,7 +16,7 @@
             <a href="#" class="text-decoration-none text-secondary">אודות</a>
             <a href="#" class="text-decoration-none text-secondary">יצירת קשר</a>
         </nav>
-        
+
         <!-- כפתורי התחברות / הצגת שם משתמש -->
         <div class="d-flex gap-2 align-items-center">
             @if (currentUser != null)
@@ -143,7 +144,7 @@
 </div>
 
 @code {
-    private DAL.User? currentUser;
+    private User? currentUser;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -154,7 +155,7 @@
                 var userJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "currentUser");
                 if (!string.IsNullOrEmpty(userJson))
                 {
-                    currentUser = System.Text.Json.JsonSerializer.Deserialize<DAL.User>(userJson);
+                    currentUser = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
                     StateHasChanged();
                 }
             }

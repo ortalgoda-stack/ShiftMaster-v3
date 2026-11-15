@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @rendermode InteractiveServer
+@using Model
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
@@ -95,14 +96,14 @@
 
         try
         {
-            // שליפת המשתמשים משרת ה-API
-            var users = await Http.GetFromJsonAsync<List<DAL.User>>("api/user");
+            // שליפת המשתמשים משרת ה-API כמודלים מסוג Model.User
+            var users = await Http.GetFromJsonAsync<List<User>>("api/user");
 
             // בדיקה האם קיימת התאמה לשם משתמש/אימייל ולסיסמה
             var user = users?.FirstOrDefault(u =>
                 (u.Username.Equals(usernameOrEmail.Trim(), StringComparison.OrdinalIgnoreCase) ||
                  u.Email.Equals(usernameOrEmail.Trim(), StringComparison.OrdinalIgnoreCase))
-                && u.PasswordHash == password);
+                && u.Password == password);
 
             if (user != null)
             {

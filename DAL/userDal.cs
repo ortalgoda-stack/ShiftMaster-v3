@@ -1,22 +1,11 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
+using Model;
 
 namespace DAL
 {
-    public class User
-    {
-        public int UserID { get; set; }
-        public string Username { get; set; } = string.Empty;
-        public string FullName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;
-        public int RoleID { get; set; }
-        public string? Phone { get; set; }
-        public int MaxShiftsPerWeek { get; set; }
-        public int MinShiftsPerWeek { get; set; }
-        public bool IsActive { get; set; } = true;
-        public DateTime CreatedAt { get; set; }
-    }
-
     public class userDal
     {
         private readonly string _connectionString;
@@ -26,35 +15,30 @@ namespace DAL
             _connectionString = connectionString;
         }
 
-        // שליפת כל המשתמשים
-        public List<User> GetAllUsers()
+        // 1. שליפת כל המשתמשים הפעילים
+        public async Task<List<User>> GetAllUsersAsync()
         {
             List<User> users = new List<User>();
 
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
-                conn.Open();
-                string query = "SELECT UserID, Username, FullName, Email, PasswordHash, RoleID, Phone, MaxShiftsPerWeek, MinShiftsPerWeek, IsActive, CreatedAt FROM Users";
+                await conn.OpenAsync();
+                string query = "SELECT Id, FullName, Email, Password, RoleId, IsActive FROM users WHERE IsActive = 1";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    using (var reader = cmd.ExecuteReader())
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        while (reader.Read())
+                        while (await reader.ReadAsync())
                         {
                             users.Add(new User
                             {
-                                UserID = Convert.ToInt32(reader["UserID"]),
-                                Username = reader["Username"].ToString()!,
-                                FullName = reader["FullName"].ToString()!,
-                                Email = reader["Email"].ToString()!,
-                                PasswordHash = reader["PasswordHash"].ToString()!,
-                                RoleID = Convert.ToInt32(reader["RoleID"]),
-                                Phone = reader["Phone"] != DBNull.Value ? reader["Phone"].ToString() : null,
-                                MaxShiftsPerWeek = Convert.ToInt32(reader["MaxShiftsPerWeek"]),
-                                MinShiftsPerWeek = Convert.ToInt32(reader["MinShiftsPerWeek"]),
-                                IsActive = Convert.ToBoolean(reader["IsActive"]),
-                                CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
+                                Id = Convert.ToInt32(reader["Id"]),
+                                FullName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString()! : "",
+                                Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString()! : "",
+                                Password = reader["Password"] != DBNull.Value ? reader["Password"].ToString()! : "",
+                                RoleId = reader["RoleId"] != DBNull.Value ? Convert.ToInt32(reader["RoleId"]) : 1,
+                                IsActive = Convert.ToBoolean(reader["IsActive"])
                             });
                         }
                     }
@@ -63,34 +47,70 @@ namespace DAL
             return users;
         }
 
-        // שליפת משתמש לפי ID
-        public User? GetUserById(int id)
+        // 2. בדיקת כפילות אימייל
+        public async Task<bool> IsEmailExistsAsync(string email)
         {
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
-                conn.Open();
-                string query = "SELECT UserID, Username, FullName, Email, PasswordHash, RoleID, Phone, MaxShiftsPerWeek, MinShiftsPerWeek, IsActive, CreatedAt FROM Users WHERE UserID = @UserID";
+                await conn.OpenAsync();
+                string query = "SELECT COUNT(*) FROM users WHERE Email = @Email";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@UserID", id);
-                    using (var reader = cmd.ExecuteReader())
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    long count = Convert.ToInt64(await cmd.ExecuteScalarAsync() ?? 0);
+                    return count > 0;
+                }
+            }
+        }
+
+        // 3. הוספת משתמש חדש
+        public async Task<bool> AddUserAsync(User user)
+        {
+            using (MySqlConnection conn = new MySqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+                string query = @"INSERT INTO users (FullName, Email, Password, RoleId, IsActive) 
+                                VALUES (@FullName, @Email, @Password, @RoleId, 1)";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@FullName", user.FullName);
+                    cmd.Parameters.AddWithValue("@Email", user.Email);
+                    cmd.Parameters.AddWithValue("@Password", user.Password);
+                    cmd.Parameters.AddWithValue("@RoleId", user.RoleId > 0 ? user.RoleId : 1);
+
+                    int rows = await cmd.ExecuteNonQueryAsync();
+                    return rows > 0;
+                }
+            }
+        }
+
+        // 4. אימות התחברות (Login)
+        public async Task<User?> LoginAsync(string email, string password)
+        {
+            using (MySqlConnection conn = new MySqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+                string query = "SELECT Id, FullName, Email, Password, RoleId, IsActive FROM users WHERE Email = @Email AND Password = @Password AND IsActive = 1";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@Password", password);
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        if (reader.Read())
+                        if (await reader.ReadAsync())
                         {
                             return new User
                             {
-                                UserID = Convert.ToInt32(reader["UserID"]),
-                                Username = reader["Username"].ToString()!,
+                                Id = Convert.ToInt32(reader["Id"]),
                                 FullName = reader["FullName"].ToString()!,
                                 Email = reader["Email"].ToString()!,
-                                PasswordHash = reader["PasswordHash"].ToString()!,
-                                RoleID = Convert.ToInt32(reader["RoleID"]),
-                                Phone = reader["Phone"] != DBNull.Value ? reader["Phone"].ToString() : null,
-                                MaxShiftsPerWeek = Convert.ToInt32(reader["MaxShiftsPerWeek"]),
-                                MinShiftsPerWeek = Convert.ToInt32(reader["MinShiftsPerWeek"]),
-                                IsActive = Convert.ToBoolean(reader["IsActive"]),
-                                CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
+                                Password = reader["Password"].ToString()!,
+                                RoleId = Convert.ToInt32(reader["RoleId"]),
+                                IsActive = Convert.ToBoolean(reader["IsActive"])
                             };
                         }
                     }
@@ -99,82 +119,18 @@ namespace DAL
             return null;
         }
 
-        // הוספת משתמש חדש
-        // הוספת משתמש חדש
-        public bool AddUser(User user)
+        // 5. מחיקה רכה
+        public async Task<bool> DeleteUserAsync(int id)
         {
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
-                conn.Open();
-                string query = @"INSERT INTO Users 
-                                (Username, FullName, Email, PasswordHash, RoleID, Phone, MaxShiftsPerWeek, MinShiftsPerWeek, IsActive) 
-                                VALUES 
-                                (@Username, @FullName, @Email, @PasswordHash, @RoleID, @Phone, @MaxShiftsPerWeek, @MinShiftsPerWeek, @IsActive)";
+                await conn.OpenAsync();
+                string query = "UPDATE users SET IsActive = 0 WHERE Id = @Id";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@Username", user.Username);
-
-                    // אם FullName ריק, נציב בו את Username
-                    cmd.Parameters.AddWithValue("@FullName", string.IsNullOrWhiteSpace(user.FullName) ? user.Username : user.FullName);
-
-                    cmd.Parameters.AddWithValue("@Email", user.Email);
-                    cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-
-                    // אם RoleID הוא 0 (לא הוגדר), ניתן לו ברירת מחדל של 1 (עובד/משתמש רגיל)
-                    cmd.Parameters.AddWithValue("@RoleID", user.RoleID <= 0 ? 1 : user.RoleID);
-
-                    cmd.Parameters.AddWithValue("@Phone", user.Phone ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@MaxShiftsPerWeek", user.MaxShiftsPerWeek);
-                    cmd.Parameters.AddWithValue("@MinShiftsPerWeek", user.MinShiftsPerWeek);
-                    cmd.Parameters.AddWithValue("@IsActive", user.IsActive);
-
-                    return cmd.ExecuteNonQuery() > 0;
-                }
-            }
-        }
-
-        // עדכון משתמש (כולל מכסות משמרות Min/Max)
-        public bool UpdateUser(User user)
-        {
-            using (MySqlConnection conn = new MySqlConnection(_connectionString))
-            {
-                conn.Open();
-                string query = @"UPDATE Users 
-                                SET Username = @Username, FullName = @FullName, Email = @Email, 
-                                    RoleID = @RoleID, Phone = @Phone, MaxShiftsPerWeek = @MaxShiftsPerWeek, 
-                                    MinShiftsPerWeek = @MinShiftsPerWeek, IsActive = @IsActive 
-                                WHERE UserID = @UserID";
-
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@UserID", user.UserID);
-                    cmd.Parameters.AddWithValue("@Username", user.Username);
-                    cmd.Parameters.AddWithValue("@FullName", user.FullName);
-                    cmd.Parameters.AddWithValue("@Email", user.Email);
-                    cmd.Parameters.AddWithValue("@RoleID", user.RoleID);
-                    cmd.Parameters.AddWithValue("@Phone", user.Phone ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@MaxShiftsPerWeek", user.MaxShiftsPerWeek);
-                    cmd.Parameters.AddWithValue("@MinShiftsPerWeek", user.MinShiftsPerWeek);
-                    cmd.Parameters.AddWithValue("@IsActive", user.IsActive);
-
-                    return cmd.ExecuteNonQuery() > 0;
-                }
-            }
-        }
-
-        // הפיכת משתמש ללא פעיל / מחיקה
-        public bool DeleteUser(int id)
-        {
-            using (MySqlConnection conn = new MySqlConnection(_connectionString))
-            {
-                conn.Open();
-                string query = "UPDATE Users SET IsActive = 0 WHERE UserID = @UserID";
-
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@UserID", id);
-                    return cmd.ExecuteNonQuery() > 0;
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    return await cmd.ExecuteNonQueryAsync() > 0;
                 }
             }
         }

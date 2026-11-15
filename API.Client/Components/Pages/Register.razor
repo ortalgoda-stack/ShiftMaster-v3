@@ -1,7 +1,7 @@
 ﻿@page "/register"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using System.Net.Mail
-@using API.Server.Models
+@using Model
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
@@ -33,7 +33,7 @@
                         </div>
                     }
 
-                    <button class="btn btn-primary btn-lg w-100 mt-2 shadow-sm mb-3" type="button" 
+                    <button class="btn btn-primary btn-lg w-100 mt-2 shadow-sm mb-3" type="button"
                             disabled="@(isBusy || isRegistered)" @onclick="RegisterAsync">
                         @(isBusy ? "בודקים..." : "הרשמה")
                     </button>
@@ -63,7 +63,6 @@
     {
         errorMessage = null;
 
-        // בדיקות קלט מקומיות ב-C#
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) ||
             string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
         {
@@ -87,16 +86,16 @@
 
         try
         {
-            // יצירת אובייקט המשתמש מתוך הנתונים שהוקלדו
-            DAL.User newUser = new DAL.User
+            // יצירת אובייקט משתמש חדש מתוך המודל
+            User newUser = new User
             {
                 Username = username.Trim(),
                 Email = email.Trim(),
-                PasswordHash = password
+                Password = password,
+                FullName = username.Trim()
             };
 
-            // שליחת בקשת POST לשרת בכתובת המדויקת api/user
-            HttpResponseMessage response = await Http.PostAsJsonAsync("api/user", newUser);
+            HttpResponseMessage response = await Http.PostAsJsonAsync("api/user/register", newUser);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -114,7 +113,6 @@
             isBusy = false;
         }
 
-        // הצלחה: ספירה לאחור ומעבר לדף הכניסה
         isRegistered = true;
         while (secondsLeft > 0)
         {

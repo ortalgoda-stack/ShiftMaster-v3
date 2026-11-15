@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
+using Model;
 
 namespace ShiftMaster.DAL
 {
@@ -35,7 +33,7 @@ namespace ShiftMaster.DAL
                         {
                             list.Add(new Role
                             {
-                                RoleID = Convert.ToInt32(reader["RoleID"]),
+                                Id = Convert.ToInt32(reader["RoleID"]),
                                 RoleName = reader["RoleName"] != DBNull.Value ? reader["RoleName"].ToString()! : ""
                             });
                         }

@@ -1,16 +1,38 @@
-@Server_HostAddress = https://localhost:7419
+@API.Server_HostAddress = https://localhost:7419
 
-### בדיקת שליפת כל המשתמשים
-GET {{Server_HostAddress}}/api/user
+### 1. שליפת כל המשתמשים (GET)
+GET {{API.Server_HostAddress}}/api/user
 Accept: application/json
 
 ###
-### בדיקת הרשמת משתמש חדש (POST)
-POST {{Server_HostAddress}}/api/user
+
+### 2. הרשמת משתמש חדש (POST register)
+POST {{API.Server_HostAddress}}/api/user/register
 Content-Type: application/json
 
 {
-  "Username": "OrtalTest",
-  "Email": "ortaltest@gmail.com",
-  "PasswordHash": "123456"
+  "username": "ortal_test",
+  "password": "Password123!",
+  "fullName": "אורטל בדיקה",
+  "email": "ortal.test@example.com",
+  "phone": "0501234567",
+  "roleId": 2,
+  "isActive": true
 }
+
+###
+
+### 3. התחברות למערכת (POST login)
+POST {{API.Server_HostAddress}}/api/user/login
+Content-Type: application/json
+
+{
+  "email": "ortal.test@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### 4. מחיקת משתמש - העברה למצב לא פעיל (DELETE)
+DELETE {{API.Server_HostAddress}}/api/user/1
+Accept: application/json

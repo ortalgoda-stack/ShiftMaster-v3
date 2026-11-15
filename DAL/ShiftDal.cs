@@ -1,19 +1,10 @@
-﻿using MySql.Data.MySqlClient;
-
+﻿using System;
+using System.Collections.Generic;
 using MySql.Data.MySqlClient;
+using Model;
 
 namespace DAL
 {
-    public class Shift
-    {
-        public int ShiftID { get; set; }
-        public string ShiftName { get; set; } = string.Empty;
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public int RequiredEmployees { get; set; } = 1;
-        public bool IsActive { get; set; } = true;
-    }
-
     public class ShiftDal
     {
         private readonly string _connectionString;
@@ -30,7 +21,7 @@ namespace DAL
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
                 conn.Open();
-                string query = "SELECT ShiftID, ShiftName, StartTime, EndTime, RequiredEmployees, IsActive FROM Shifts";
+                string query = "SELECT Id, ShiftName, StartTime, EndTime, RequiredEmployees, IsActive FROM Shifts";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
@@ -38,19 +29,15 @@ namespace DAL
                     {
                         while (reader.Read())
                         {
-                            // טיפול בטוח בזמנים (TimeSpan מ-MySQL)
                             TimeSpan startTimeSpan = reader["StartTime"] != DBNull.Value ? (TimeSpan)reader["StartTime"] : TimeSpan.Zero;
                             TimeSpan endTimeSpan = reader["EndTime"] != DBNull.Value ? (TimeSpan)reader["EndTime"] : TimeSpan.Zero;
 
                             shifts.Add(new Shift
                             {
-                                ShiftID = Convert.ToInt32(reader["ShiftID"]),
+                                Id = Convert.ToInt32(reader["Id"]),
                                 ShiftName = reader["ShiftName"] != DBNull.Value ? reader["ShiftName"].ToString()! : "",
-
-                                // אם המודל Shift אצלך משתמש ב-DateTime:
                                 StartTime = DateTime.Today.Add(startTimeSpan),
                                 EndTime = DateTime.Today.Add(endTimeSpan),
-
                                 RequiredEmployees = reader["RequiredEmployees"] != DBNull.Value ? Convert.ToInt32(reader["RequiredEmployees"]) : 1,
                                 IsActive = reader["IsActive"] != DBNull.Value ? Convert.ToBoolean(reader["IsActive"]) : true
                             });
@@ -66,18 +53,18 @@ namespace DAL
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
                 conn.Open();
-                string query = "SELECT ShiftID, ShiftName, StartTime, EndTime, RequiredEmployees, IsActive FROM Shifts WHERE ShiftID = @ShiftID";
+                string query = "SELECT Id, ShiftName, StartTime, EndTime, RequiredEmployees, IsActive FROM Shifts WHERE Id = @Id";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@ShiftID", id);
+                    cmd.Parameters.AddWithValue("@Id", id);
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
                             return new Shift
                             {
-                                ShiftID = Convert.ToInt32(reader["ShiftID"]),
+                                Id = Convert.ToInt32(reader["Id"]),
                                 ShiftName = reader["ShiftName"].ToString()!,
                                 StartTime = Convert.ToDateTime(reader["StartTime"]),
                                 EndTime = Convert.ToDateTime(reader["EndTime"]),
@@ -120,11 +107,11 @@ namespace DAL
                 string query = @"UPDATE Shifts 
                                 SET ShiftName = @ShiftName, StartTime = @StartTime, EndTime = @EndTime, 
                                     RequiredEmployees = @RequiredEmployees, IsActive = @IsActive 
-                                WHERE ShiftID = @ShiftID";
+                                WHERE Id = @Id";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@ShiftID", shift.ShiftID);
+                    cmd.Parameters.AddWithValue("@Id", shift.Id);
                     cmd.Parameters.AddWithValue("@ShiftName", shift.ShiftName);
                     cmd.Parameters.AddWithValue("@StartTime", shift.StartTime);
                     cmd.Parameters.AddWithValue("@EndTime", shift.EndTime);
@@ -141,11 +128,11 @@ namespace DAL
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
                 conn.Open();
-                string query = "UPDATE Shifts SET IsActive = 0 WHERE ShiftID = @ShiftID";
+                string query = "UPDATE Shifts SET IsActive = 0 WHERE Id = @Id";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@ShiftID", id);
+                    cmd.Parameters.AddWithValue("@Id", id);
                     return cmd.ExecuteNonQuery() > 0;
                 }
             }

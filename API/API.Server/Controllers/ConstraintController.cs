@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using Model;
 using Microsoft.AspNetCore.Mvc;
 using ShiftMaster.DAL;
 

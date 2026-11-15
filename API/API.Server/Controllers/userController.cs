@@ -1,5 +1,8 @@
-﻿using DAL;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using DAL;
+using Model;
 
 namespace API.Server.Controllers
 {
@@ -9,19 +12,17 @@ namespace API.Server.Controllers
     {
         private readonly userDal _userDal;
 
-        public userController(IConfiguration configuration)
+        public userController(userDal userDal)
         {
-            string connectionString = configuration.GetConnectionString("DefaultConnection")!;
-            _userDal = new userDal(connectionString);
+            _userDal = userDal;
         }
 
-        // GET: api/user
         [HttpGet]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
             try
             {
-                var users = _userDal.GetAllUsers();
+                var users = await _userDal.GetAllUsersAsync();
                 return Ok(users);
             }
             catch (Exception ex)
@@ -30,80 +31,64 @@ namespace API.Server.Controllers
             }
         }
 
-        // GET: api/user/5
-        [HttpGet("{id}")]
-        public IActionResult GetUserById(int id)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] User user)
         {
+            if (user == null || string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrWhiteSpace(user.Password))
+            {
+                return BadRequest(new { message = "נתוני הרשמה אינם תקינים" });
+            }
+
             try
             {
-                var user = _userDal.GetUserById(id);
+                bool exists = await _userDal.IsEmailExistsAsync(user.Email);
+                if (exists)
+                {
+                    return BadRequest(new { message = "כתובת האימייל כבר קיימת במערכת" });
+                }
+
+                bool success = await _userDal.AddUserAsync(user);
+                if (success)
+                {
+                    return Ok(new { message = "המשתמש נרשם בהצלחה!" });
+                }
+                return BadRequest(new { message = "הרשמת המשתמש נכשלה" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "שגיאה בהרשמת המשתמש", error = ex.Message });
+            }
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            {
+                return BadRequest(new { message = "פרטי התחברות חסרים" });
+            }
+
+            try
+            {
+                var user = await _userDal.LoginAsync(request.Email, request.Password);
                 if (user == null)
                 {
-                    return NotFound(new { message = $"משתמש עם מזהה {id} לא נמצא" });
+                    return Unauthorized(new { message = "אימייל או סיסמה שגויים" });
                 }
                 return Ok(user);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "שגיאה בשליפת המשתמש", error = ex.Message });
+                return StatusCode(500, new { message = "שגיאה בתהליך ההתחברות", error = ex.Message });
             }
         }
 
-        // POST: api/user
-        [HttpPost]
-        public IActionResult AddUser([FromBody] DAL.User user)
-        {
-            if (user == null)
-            {
-                return BadRequest(new { message = "נתוני המשתמש אינם תקינים" });
-            }
-
-            try
-            {
-                bool success = _userDal.AddUser(user);
-                if (success)
-                {
-                    return Ok(new { message = "המשתמש נוצר בהצלחה!" });
-                }
-                return BadRequest(new { message = "יצירת המשתמש נכשלה" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "שגיאה בהוספת המשתמש", error = ex.Message });
-            }
-        }
-
-        // PUT: api/user/5
-        [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] DAL.User user)
-        {
-            if (user == null || user.UserID != id)
-            {
-                return BadRequest(new { message = "נתוני המשתמש או המזהה אינם תואמים" });
-            }
-
-            try
-            {
-                bool success = _userDal.UpdateUser(user);
-                if (success)
-                {
-                    return Ok(new { message = "פרטי המשתמש עודכנו בהצלחה!" });
-                }
-                return NotFound(new { message = "המשתמש לא נמצא לעדכון" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "שגיאה בעדכון המשתמש", error = ex.Message });
-            }
-        }
-
-        // DELETE: api/user/5
         [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
             try
             {
-                bool success = _userDal.DeleteUser(id);
+                bool success = await _userDal.DeleteUserAsync(id);
                 if (success)
                 {
                     return Ok(new { message = "המשתמש הועבר למצב לא-פעיל בהצלחה!" });
@@ -112,8 +97,14 @@ namespace API.Server.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "שגיאה בשינוי סטטוס המשתמש", error = ex.Message });
+                return StatusCode(500, new { message = "שגיאה בביטול המשתמש", error = ex.Message });
             }
         }
+    }
+
+    public class LoginRequest
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }

@@ -1,5 +1,8 @@
-﻿using DAL;
+﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using DAL;
+using Model;
 
 namespace API.Server.Controllers
 {
@@ -73,7 +76,7 @@ namespace API.Server.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateShift(int id, [FromBody] Shift shift)
         {
-            if (shift == null || shift.ShiftID != id)
+            if (shift == null || shift.Id != id)
             {
                 return BadRequest(new { message = "נתוני המשמרת אינם תואמים" });
             }

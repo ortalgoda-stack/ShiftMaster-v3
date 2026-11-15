@@ -1,9 +1,10 @@
-﻿@inject IJSRuntime JSRuntime
+﻿@using Model
+@inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 
 <header class="p-3 mb-3 border-bottom bg-white shadow-sm" dir="rtl">
     <div class="container d-flex flex-wrap align-items-center justify-content-between">
-        
+
         <!-- לוגו -->
         <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none fw-bold fs-4 gap-2">
             <span class="bg-primary text-white p-2 rounded-3 fs-5">ShiftMaster</span>
@@ -37,7 +38,7 @@
 </header>
 
 @code {
-    private DAL.User? currentUser;
+    private User? currentUser;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -48,7 +49,7 @@
                 var userJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "currentUser");
                 if (!string.IsNullOrEmpty(userJson))
                 {
-                    currentUser = System.Text.Json.JsonSerializer.Deserialize<DAL.User>(userJson);
+                    currentUser = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
                     StateHasChanged(); // רענון התצוגה לאחר טעינת המשתמש
                 }
             }
