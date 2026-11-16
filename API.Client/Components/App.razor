@@ -11,13 +11,18 @@
     <link rel="stylesheet" href="@Assets["API.Client.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="pageRenderMode" />
 </head>
 
 <body>
-    <Routes />
+    <Routes @rendermode="pageRenderMode" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
 </html>
+
+@code {
+    private static readonly IComponentRenderMode pageRenderMode =
+        new InteractiveServerRenderMode(prerender: false);
+}

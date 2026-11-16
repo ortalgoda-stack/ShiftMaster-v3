@@ -1,9 +1,9 @@
 ﻿@page "/login"
-@rendermode InteractiveServer
+@using System.Net
 @using Model
 @inject HttpClient Http
+@inject UserSession Session
 @inject NavigationManager Navigation
-@inject IJSRuntime JSRuntime
 
 <div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5" dir="rtl">
     <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 style-card">
@@ -85,6 +85,8 @@
 
     private async Task LoginAsync()
     {
+        errorMessage = null;
+
         if (string.IsNullOrWhiteSpace(usernameOrEmail) || string.IsNullOrWhiteSpace(password))
         {
             errorMessage = "יש למלא שם משתמש/אימייל וסיסמה.";
@@ -92,14 +94,11 @@
         }
 
         isBusy = true;
-        errorMessage = null;
 
         try
         {
-            // שליפת המשתמשים משרת ה-API כמודלים מסוג Model.User
             var users = await Http.GetFromJsonAsync<List<User>>("api/user");
 
-            // בדיקה האם קיימת התאמה לשם משתמש/אימייל ולסיסמה
             var user = users?.FirstOrDefault(u =>
                 (u.Username.Equals(usernameOrEmail.Trim(), StringComparison.OrdinalIgnoreCase) ||
                  u.Email.Equals(usernameOrEmail.Trim(), StringComparison.OrdinalIgnoreCase))
@@ -107,16 +106,20 @@
 
             if (user != null)
             {
-                // שמירת המשתמש בדפדפן (localStorage)
-                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "currentUser", System.Text.Json.JsonSerializer.Serialize(user));
+                // שמירת המשתמש בשירות UserSession (מפעיל את OnChange ומעדכן את הסרגל העליון!)
+                Session.Login(user);
 
-                // מעבר לדף הבית
-                Navigation.NavigateTo("/", forceLoad: true);
+                // מעבר חלק לדף הבית בלי forceLoad כדי לשמור על החיבור וה-Session
+                Navigation.NavigateTo("/");
             }
             else
             {
-                errorMessage = "שם משתמש/אימייל או סיסמה שגויים.";
+                errorMessage = "שם המשתמש או הסיסמה שגויים.";
             }
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "השרת לא זמין כרגע. נסו שוב בעוד רגע.";
         }
         catch (Exception ex)
         {

@@ -1,39 +1,7 @@
-﻿@using Model
-@page "/"
-@inject IJSRuntime JSRuntime
-@inject NavigationManager Navigation
+﻿@page "/"
+@inject UserSession Session
 
 <div class="min-vh-100 bg-light p-4" dir="rtl">
-    <!-- Header / Navbar -->
-    <header class="d-flex justify-content-between align-items-center bg-white p-3 rounded-4 shadow-sm mb-4">
-        <div class="d-flex align-items-center gap-3">
-            <div class="bg-primary text-white p-2 rounded-3 fw-bold fs-4">ShiftMaster</div>
-            <span class="text-muted small">ניהול משמרות חכם</span>
-        </div>
-        <nav class="d-none d-md-flex gap-4 fw-semibold text-secondary">
-            <a href="/" class="text-primary text-decoration-none">דף הבית</a>
-            <a href="#" class="text-decoration-none text-secondary">תוכניות</a>
-            <a href="#" class="text-decoration-none text-secondary">אודות</a>
-            <a href="#" class="text-decoration-none text-secondary">יצירת קשר</a>
-        </nav>
-
-        <!-- כפתורי התחברות / הצגת שם משתמש -->
-        <div class="d-flex gap-2 align-items-center">
-            @if (currentUser != null)
-            {
-                <span class="fw-bold text-primary me-2">👋 שלום, @currentUser.FullName</span>
-                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" @onclick="LogoutAsync">
-                    התנתק
-                </button>
-            }
-            else
-            {
-                <a href="/login" class="btn btn-outline-secondary px-4 rounded-pill">התחברות</a>
-                <a href="/register" class="btn btn-primary px-4 rounded-pill">הרשמה למערכת</a>
-            }
-        </div>
-    </header>
-
     <!-- Main Content Grid -->
     <div class="row g-4 align-items-center">
         <!-- Hero Section Right -->
@@ -47,10 +15,10 @@
                 פלטפורמה אינטואיטיבית ומתקדמת לניהול עובדים, הגשת זמינות שבועית, ויצירת לוח משמרות אופטימלי בלחיצת כפתור אחת. מותאם למנהלים ולצוותים בכל סדר גודל.
             </p>
             <div class="d-flex gap-3 justify-content-start mb-4">
-                @if (currentUser != null)
+                @if (Session.IsLoggedIn)
                 {
                     <span class="badge bg-success-subtle text-success fs-6 p-3 rounded-pill">
-                        אתה מחובר למערכת בהצלחה!
+                        שלום @Session.Username, אתה מחובר למערכת בהצלחה!
                     </span>
                 }
                 else
@@ -142,34 +110,3 @@
         </div>
     </div>
 </div>
-
-@code {
-    private User? currentUser;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                var userJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "currentUser");
-                if (!string.IsNullOrEmpty(userJson))
-                {
-                    currentUser = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
-                    StateHasChanged();
-                }
-            }
-            catch
-            {
-                // במידה ואין משתמש ב-localStorage
-            }
-        }
-    }
-
-    private async Task LogoutAsync()
-    {
-        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "currentUser");
-        currentUser = null;
-        Navigation.NavigateTo("/", forceLoad: true);
-    }
-}

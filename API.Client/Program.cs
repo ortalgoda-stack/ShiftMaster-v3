@@ -10,6 +10,7 @@ string apiBaseUrl = builder.Configuration["ApiBaseUrl"]
     ?? throw new InvalidOperationException("ApiBaseUrl not found in appsettings.json.");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
+builder.Services.AddScoped<API.Client.Services.UserSession>();
 
 var app = builder.Build();
 
