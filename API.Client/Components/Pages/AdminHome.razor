@@ -1,0 +1,41 @@
+﻿@page "/admin"
+@using API.Client.Services
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+@* הצגת תוכן הדף רק אם המשתמש מחובר והתפקיד שלו הוא מנהל מערכת (RoleId == 1) *@
+@if (isAuthorized)
+{
+    <div class="container mt-5" dir="rtl">
+        <h1>דף ראשי - מנהל מערכת</h1>
+        <p>שלום @Session.FullName, ברוך הבא לאזור הניהול.</p>
+    </div>
+}
+
+@code {
+    // משתנה עזר המציין האם למשתמש יש הרשאה לצפות בדף
+    private bool isAuthorized = false;
+
+    // פעולה הרצה בעת טעינת הדף ובודקת את הרשאות המשתמש המחובר
+    protected override void OnInitialized()
+    {
+        // בדיקה האם קיים משתמש מחובר במערכת
+        if (!Session.IsLoggedIn)
+        {
+            // אורח שאינו מחובר מועבר לדף הכניסה
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        // בדיקה האם תפקיד המשתמש המחובר מתאים לדף מנהל מערכת (RoleId == 1)
+        if (Session.RoleId != 1)
+        {
+            // למשתמש אין הרשאה מתאימה ולכן מועבר לדף אין הרשאה
+            Navigation.NavigateTo("/access-denied");
+            return;
+        }
+
+        // המשתמש מחובר ובעל תפקיד מתאים - מאשרים הצגת התוכן
+        isAuthorized = true;
+    }
+}

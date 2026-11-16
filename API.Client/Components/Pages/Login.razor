@@ -97,24 +97,48 @@
 
         try
         {
-            var users = await Http.GetFromJsonAsync<List<User>>("api/user");
+            var payload = new { Email = usernameOrEmail.Trim(), Password = password };
+            var response = await Http.PostAsJsonAsync("api/user/login", payload);
 
-            var user = users?.FirstOrDefault(u =>
-                (u.Username.Equals(usernameOrEmail.Trim(), StringComparison.OrdinalIgnoreCase) ||
-                 u.Email.Equals(usernameOrEmail.Trim(), StringComparison.OrdinalIgnoreCase))
-                && u.Password == password);
-
-            if (user != null)
-            {
-                // שמירת המשתמש בשירות UserSession (מפעיל את OnChange ומעדכן את הסרגל העליון!)
-                Session.Login(user);
-
-                // מעבר חלק לדף הבית בלי forceLoad כדי לשמור על החיבור וה-Session
-                Navigation.NavigateTo("/");
-            }
-            else
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 errorMessage = "שם המשתמש או הסיסמה שגויים.";
+                return;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = "שגיאה בשרת. נסו שוב מאוחר יותר.";
+                return;
+            }
+
+            var user = await response.Content.ReadFromJsonAsync<User>();
+            if (user != null)
+            {
+                // שמירת פרטי המשתמש המחובר בשירות מצב המשתמש
+                Session.Login(user);
+
+                // מעבר לדף הראשי המתאים לפי מזהה התפקיד (RoleId) של המשתמש
+                if (user.RoleId == 1)
+                {
+                    // תפקיד 1: מנהל מערכת
+                    Navigation.NavigateTo("/admin");
+                }
+                else if (user.RoleId == 3)
+                {
+                    // תפקיד 3: מנהל משמרת
+                    Navigation.NavigateTo("/manager");
+                }
+                else if (user.RoleId == 2)
+                {
+                    // תפקיד 2: עובד רגיל
+                    Navigation.NavigateTo("/employee");
+                }
+                else
+                {
+                    // ברירת מחדל במקרה של תפקיד לא מזוהה
+                    Navigation.NavigateTo("/");
+                }
             }
         }
         catch (HttpRequestException)

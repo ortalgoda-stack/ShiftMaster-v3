@@ -23,6 +23,10 @@ namespace API.Server.Controllers
             try
             {
                 var users = await _userDal.GetAllUsersAsync();
+                foreach (var u in users)
+                {
+                    u.Password = string.Empty;
+                }
                 return Ok(users);
             }
             catch (Exception ex)
@@ -73,8 +77,11 @@ namespace API.Server.Controllers
                 var user = await _userDal.LoginAsync(request.Email, request.Password);
                 if (user == null)
                 {
-                    return Unauthorized(new { message = "אימייל או סיסמה שגויים" });
+                    return Unauthorized(new { message = "שם המשתמש או הסיסמה שגויים" });
                 }
+
+                // ריקון הסיסמה/גיבוב לפני החזרת המשתמש מה-API
+                user.Password = string.Empty;
                 return Ok(user);
             }
             catch (Exception ex)

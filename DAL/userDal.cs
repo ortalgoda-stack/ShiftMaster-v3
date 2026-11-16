@@ -82,7 +82,7 @@ namespace DAL
             }
         }
 
-        // 3. הוספת משתמש חדש (כולל Username!)
+        // 3. הוספת משתמש חדש - שמירת גיבוב (Hash) של הסיסמה!
         public async Task<bool> AddUserAsync(User user)
         {
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
@@ -96,7 +96,7 @@ namespace DAL
                     cmd.Parameters.AddWithValue("@Username", user.Username);
                     cmd.Parameters.AddWithValue("@FullName", user.FullName);
                     cmd.Parameters.AddWithValue("@Email", user.Email);
-                    cmd.Parameters.AddWithValue("@Password", user.Password);
+                    cmd.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword(user.Password));
                     cmd.Parameters.AddWithValue("@RoleId", user.RoleId > 0 ? user.RoleId : 1);
 
                     int rows = await cmd.ExecuteNonQueryAsync();
@@ -105,7 +105,24 @@ namespace DAL
             }
         }
 
-        // 4. אימות התחברות (עובד גם עם אימייל וגם עם שם משתמש!)
+        // עדכון סיסמה - שמירת גיבוב (Hash) של הסיסמה החדשה
+        public async Task<bool> UpdatePasswordAsync(int userId, string newPassword)
+        {
+            using (MySqlConnection conn = new MySqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+                string query = "UPDATE users SET Password = @Password WHERE Id = @Id";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword(newPassword));
+                    cmd.Parameters.AddWithValue("@Id", userId);
+                    return await cmd.ExecuteNonQueryAsync() > 0;
+                }
+            }
+        }
+
+        // 4. אימות התחברות מול הגיבוב השמור בעזרת BCrypt.Verify
         public async Task<User?> LoginAsync(string identifier, string password)
         {
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
@@ -114,28 +131,32 @@ namespace DAL
                 string query = @"SELECT Id, Username, FullName, Email, Password, RoleId, IsActive 
                                  FROM users 
                                  WHERE (Email = @Identifier OR Username = @Identifier) 
-                                   AND Password = @Password 
                                    AND IsActive = 1";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@Identifier", identifier);
-                    cmd.Parameters.AddWithValue("@Password", password);
 
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
                         {
-                            return new User
+                            string storedHash = reader["Password"] != DBNull.Value ? reader["Password"].ToString()! : "";
+
+                            // בדיקת הסיסמה שהוקלדה מול הגיבוב השמור בטבלה
+                            if (!string.IsNullOrEmpty(storedHash) && BCrypt.Net.BCrypt.Verify(password, storedHash))
                             {
-                                Id = Convert.ToInt32(reader["Id"]),
-                                Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString()! : "",
-                                FullName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString()! : "",
-                                Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString()! : "",
-                                Password = reader["Password"] != DBNull.Value ? reader["Password"].ToString()! : "",
-                                RoleId = reader["RoleId"] != DBNull.Value ? Convert.ToInt32(reader["RoleId"]) : 1,
-                                IsActive = Convert.ToBoolean(reader["IsActive"])
-                            };
+                                return new User
+                                {
+                                    Id = Convert.ToInt32(reader["Id"]),
+                                    Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString()! : "",
+                                    FullName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString()! : "",
+                                    Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString()! : "",
+                                    Password = storedHash,
+                                    RoleId = reader["RoleId"] != DBNull.Value ? Convert.ToInt32(reader["RoleId"]) : 1,
+                                    IsActive = Convert.ToBoolean(reader["IsActive"])
+                                };
+                            }
                         }
                     }
                 }

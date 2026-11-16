@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 
 namespace DAL
 {
+    // מחלקת בסיס עבור כל מחלקות הגישה לנתונים השומרת את מחרוזת החיבור
     public abstract class BaseDB
     {
         protected readonly string connectionString;
@@ -13,6 +14,7 @@ namespace DAL
         }
     }
 
+    // מחלקה האחראית על יצירה ואתחול ראשוני של מסד הנתונים והטבלאות
     public class DatabaseInitializer
     {
         private readonly string _connectionString;
@@ -22,6 +24,7 @@ namespace DAL
             _connectionString = connectionString;
         }
 
+        // פעולה היוצרת את מסד הנתונים, הטבלאות, התפקידים ומשתמשי הבדיקה אם אינם קיימים
         public void Initialize()
         {
             var builder = new MySqlConnectionStringBuilder(_connectionString);
@@ -103,8 +106,8 @@ namespace DAL
                         FOREIGN KEY (UserId) REFERENCES Users(Id)
                     );",
 
-                    // הוספת תפקידי ברירת מחדל
-                    @"INSERT IGNORE INTO Roles (Id, RoleName) VALUES (1, 'Admin'), (2, 'Employee');"
+                    // הוספת שלושה תפקידים למערכת: 1=מנהל מערכת, 2=עובד, 3=מנהל משמרת
+                    @"INSERT IGNORE INTO Roles (Id, RoleName) VALUES (1, 'Admin'), (2, 'Employee'), (3, 'ShiftManager');"
                 };
 
                 foreach (var query in createTablesQueries)
@@ -112,6 +115,51 @@ namespace DAL
                     using (var cmd = new MySqlCommand(query, conn))
                     {
                         cmd.ExecuteNonQuery();
+                    }
+                }
+
+                // 4. הוספת שלושה משתמשים התחלתיים (אחד לכל תפקיד) עם סיסמאות מגובבות
+                using (var checkCmd = new MySqlCommand("SELECT COUNT(*) FROM Users;", conn))
+                {
+                    long userCount = Convert.ToInt64(checkCmd.ExecuteScalar() ?? 0);
+                    if (userCount == 0)
+                    {
+                        string insertSeedUser = @"
+                            INSERT INTO Users (Username, Password, FullName, Email, RoleId, IsActive)
+                            VALUES (@Username, @Password, @FullName, @Email, (SELECT Id FROM Roles WHERE RoleName = @RoleName), TRUE);";
+
+                        // משתמש בדיקה לתפקיד מנהל מערכת
+                        using (var adminCmd = new MySqlCommand(insertSeedUser, conn))
+                        {
+                            adminCmd.Parameters.AddWithValue("@Username", "admin");
+                            adminCmd.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword("admin"));
+                            adminCmd.Parameters.AddWithValue("@FullName", "מנהל מערכת");
+                            adminCmd.Parameters.AddWithValue("@Email", "admin@shiftmaster.local");
+                            adminCmd.Parameters.AddWithValue("@RoleName", "Admin");
+                            adminCmd.ExecuteNonQuery();
+                        }
+
+                        // משתמש בדיקה לתפקיד עובד רגיל
+                        using (var userCmd = new MySqlCommand(insertSeedUser, conn))
+                        {
+                            userCmd.Parameters.AddWithValue("@Username", "user");
+                            userCmd.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword("user"));
+                            userCmd.Parameters.AddWithValue("@FullName", "עובד מערכת");
+                            userCmd.Parameters.AddWithValue("@Email", "user@shiftmaster.local");
+                            userCmd.Parameters.AddWithValue("@RoleName", "Employee");
+                            userCmd.ExecuteNonQuery();
+                        }
+
+                        // משתמש בדיקה לתפקיד מנהל משמרת (אחמ"ש)
+                        using (var managerCmd = new MySqlCommand(insertSeedUser, conn))
+                        {
+                            managerCmd.Parameters.AddWithValue("@Username", "manager");
+                            managerCmd.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword("manager"));
+                            managerCmd.Parameters.AddWithValue("@FullName", "מנהל משמרת");
+                            managerCmd.Parameters.AddWithValue("@Email", "manager@shiftmaster.local");
+                            managerCmd.Parameters.AddWithValue("@RoleName", "ShiftManager");
+                            managerCmd.ExecuteNonQuery();
+                        }
                     }
                 }
             }
