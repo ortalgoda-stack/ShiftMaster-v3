@@ -3,39 +3,199 @@
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* הצגת תוכן הדף רק אם המשתמש מחובר והתפקיד שלו הוא מנהל משמרת (RoleId == 3) *@
+@* דף ראשי של מנהל משמרת (Manager) - מציג מדדי שיבוץ שבועיים, התראות איוש וטבלת משמרות להיום *@
 @if (isAuthorized)
 {
-    <div class="container mt-5" dir="rtl">
-        <h1>דף ראשי - מנהל משמרת</h1>
-        <p>שלום @Session.FullName, ברוך הבא לניהול המשמרות והשיבוצים.</p>
+    <div class="container-fluid py-3" dir="rtl">
+
+        @* כותרת דף משותפת (רכיב Shared) עם תגית תפקיד *@
+        <PageHeader Title="@($"שלום, {Session.Username ?? "רועי לוי"} 👋")"
+                    Subtitle="ניהול משמרות יומי, מעקב איוש וטיפול באילוצי צוות"
+                    RoleBadge="מנהל משמרת" />
+
+        @* שורת כפתורי פעולה מהירה *@
+        <div class="d-flex flex-wrap justify-content-end gap-2 mb-4">
+            <a href="/manager/shifts" class="btn btn-outline-primary rounded-3 fw-semibold">
+                📋 מעבר ללוח שיבוצים מלא
+            </a>
+            <a href="/manager/shifts" class="btn sm-btn-primary">
+                ➕ יצירת שיבוץ מהיר
+            </a>
+        </div>
+
+        @* 3 כרטיסי KPI מרכזיים באמצעות הרכיב המשותף StatCard *@
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <StatCard Title="משמרות השבוע"
+                          Value="18"
+                          Subtitle="מתוך 20 מתוכננות (+3 מהשבוע שעבר)"
+                          Icon="📅"
+                          ColorClass="text-primary" />
+            </div>
+            <div class="col-12 col-md-4">
+                <StatCard Title="משמרות חסרות איוש"
+                          Value="2"
+                          Subtitle="דורש טיפול מיידי • סניף מרכז וצפון"
+                          Icon="⏰"
+                          ColorClass="text-danger" />
+            </div>
+            <div class="col-12 col-md-4">
+                <StatCard Title="אילוצים ממתינים לאישור"
+                          Value="4"
+                          Subtitle="2 בקשות חילוף • 2 בקשות היעדרות"
+                          Icon="⏳"
+                          ColorClass="text-dark" />
+            </div>
+        </div>
+
+        @* פס התראה תפעולית על משמרת חסרת איוש *@
+        <div class="alert alert-danger border-0 rounded-4 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 p-3 p-md-4 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="fs-3">🔔</div>
+                <div>
+                    <div class="fw-bold text-danger-emphasis">
+                        תשומת לב: חסר עובד במשמרת ערב בסניף מרכז (16:00 - 00:00)
+                    </div>
+                    <small class="text-secondary">
+                        זוהו 3 עובדים זמינים התואמים את דרישות התפקיד לקריאה מיידית
+                    </small>
+                </div>
+            </div>
+            <a href="/manager/shifts" class="btn btn-danger rounded-3 fw-semibold align-self-start align-self-md-center">
+                👤 שיבוץ עובד כעת
+            </a>
+        </div>
+
+        @* טבלה רספונסיבית: משמרות להיום *@
+        <div class="sm-card p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0">משמרות להיום</h5>
+                    <small class="text-muted">פריסת מוקדים וסניפים בזמן אמת</small>
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                    <span class="badge bg-primary px-3 py-2">כל המשמרות</span>
+                    <span class="badge bg-light text-dark border px-3 py-2">בוקר</span>
+                    <span class="badge bg-light text-dark border px-3 py-2">צהריים</span>
+                    <span class="badge bg-light text-dark border px-3 py-2">ערב / לילה</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>שעת משמרת</th>
+                            <th>עמדה / מחלקה</th>
+                            <th>אחראי עמדה</th>
+                            <th>עובדים משובצים</th>
+                            <th>סטטוס איוש</th>
+                            <th class="text-start">פעולה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* שורה 1 *@
+                        <tr>
+                            <td>
+                                <span class="fw-bold">08:00 - 16:00</span>
+                                <small class="text-muted d-block">משמרת בוקר</small>
+                            </td>
+                            <td class="fw-semibold">מוקד שירות לקוחות</td>
+                            <td>מיכל אברהם</td>
+                            <td><span class="badge bg-light text-dark border">5 / 5 עובדים</span></td>
+                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
+                            <td class="text-start">
+                                <a href="/manager/shifts" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</a>
+                            </td>
+                        </tr>
+
+                        @* שורה 2 *@
+                        <tr>
+                            <td>
+                                <span class="fw-bold">12:00 - 20:00</span>
+                                <small class="text-muted d-block">משמרת אמצע</small>
+                            </td>
+                            <td class="fw-semibold">קופות ראשי - סניף צפון</td>
+                            <td>תומר כהן</td>
+                            <td><span class="badge bg-light text-dark border">4 / 4 עובדים</span></td>
+                            <td><span class="badge bg-success-subtle text-success">● מאויש</span></td>
+                            <td class="text-start">
+                                <a href="/manager/shifts" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</a>
+                            </td>
+                        </tr>
+
+                        @* שורה 3 - משמרת חסרה מודגשת באדום *@
+                        <tr class="table-danger">
+                            <td>
+                                <span class="fw-bold text-danger">16:00 - 00:00</span>
+                                <small class="text-danger d-block">משמרת ערב</small>
+                            </td>
+                            <td class="fw-bold">שירות מהיר - סניף מרכז</td>
+                            <td>איתי ברנע</td>
+                            <td><span class="badge bg-danger text-white">3 / 4 עובדים (חסר עובד)</span></td>
+                            <td><span class="badge bg-danger-subtle text-danger fw-bold">● חסר עובד</span></td>
+                            <td class="text-start">
+                                <a href="/manager/shifts" class="btn btn-sm btn-danger fw-semibold">שיבוץ דחוף</a>
+                            </td>
+                        </tr>
+
+                        @* שורה 4 *@
+                        <tr>
+                            <td>
+                                <span class="fw-bold">00:00 - 08:00</span>
+                                <small class="text-muted d-block">משמרת לילה</small>
+                            </td>
+                            <td class="fw-semibold">מוקד תמיכה טכנית</td>
+                            <td>דניאל פרידמן</td>
+                            <td><span class="badge bg-light text-dark border">2 / 2 עובדים</span></td>
+                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
+                            <td class="text-start">
+                                <a href="/manager/shifts" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</a>
+                            </td>
+                        </tr>
+
+                        @* שורה 5 *@
+                        <tr>
+                            <td>
+                                <span class="fw-bold">08:30 - 17:00</span>
+                                <small class="text-muted d-block">מנהלה</small>
+                            </td>
+                            <td class="fw-semibold">מרחב פיקוח ובקרה</td>
+                            <td>שירה שטרן</td>
+                            <td><span class="badge bg-light text-dark border">6 / 6 עובדים</span></td>
+                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
+                            <td class="text-start">
+                                <a href="/manager/shifts" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 }
 
 @code {
-    // משתנה עזר המציין האם למשתמש יש הרשאה לצפות בדף
+    // דגל המציין האם המשתמש מורשה לצפות בדף מנהל המשמרת
     private bool isAuthorized = false;
 
-    // פעולה הרצה בעת טעינת הדף ובודקת את הרשאות המשתמש המחובר
     protected override void OnInitialized()
     {
-        // בדיקה האם קיים משתמש מחובר במערכת
+        // בדיקת התחברות: אם המשתמש לא מחובר, הפניה לדף הכניסה
         if (!Session.IsLoggedIn)
         {
-            // אורח שאינו מחובר מועבר לדף הכניסה
             Navigation.NavigateTo("/login");
             return;
         }
 
-        // בדיקה האם תפקיד המשתמש המחובר מתאים לדף מנהל משמרת (RoleId == 3)
+        // בדיקת הרשאה: רק מנהל משמרת (RoleId == 3) מורשה להיכנס לדף זה
         if (Session.RoleId != 3)
         {
-            // למשתמש אין הרשאה מתאימה ולכן מועבר לדף אין הרשאה
             Navigation.NavigateTo("/access-denied");
             return;
         }
 
-        // המשתמש מחובר ובעל תפקיד מתאים - מאשרים הצגת התוכן
         isAuthorized = true;
     }
 }

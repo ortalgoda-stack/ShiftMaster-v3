@@ -1,0 +1,314 @@
+﻿@page "/admin/users"
+@using API.Client.Services
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+@* דף ניהול משתמשים והרשאות (Admin בלבד) - מציג מדדי כוח אדם, סינון וטבלת עובדים *@
+@if (isAuthorized)
+{
+    <div class="container-fluid py-3" dir="rtl">
+
+        @* כותרת דף משותפת (רכיב Shared) עם תגית תפקיד *@
+        <PageHeader Title="ניהול עובדים והרשאות"
+                    Subtitle="ניהול רשימת העובדים, הקצאת תפקידים ורמות גישה למערכת ShiftMaster ומעקב זמינות"
+                    RoleBadge="מנהל מערכת" />
+
+        @* שורת כפתורי פעולה מהירה *@
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <a href="/admin" class="btn btn-outline-secondary rounded-3 fw-semibold">
+                → חזרה לדשבורד מנהל
+            </a>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-primary rounded-3 fw-semibold">
+                    📥 ייצוא לאקסל / CSV
+                </button>
+                <button type="button" class="btn sm-btn-primary">
+                    ➕ הוספת משתמש חדש
+                </button>
+            </div>
+        </div>
+
+        @* 4 כרטיסי KPI מרכזיים באמצעות הרכיב המשותף StatCard *@
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="סה״כ עובדים רשומים"
+                          Value="24"
+                          Subtitle="+2 עובדים חדשים נוספו החודש"
+                          Icon="👥"
+                          ColorClass="text-primary" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="פעילים במערכת כעת"
+                          Value="22"
+                          Subtitle="91.6% שיעור כשירות למשמרת"
+                          Icon="✅"
+                          ColorClass="text-success" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="מנהלי משמרות ומערכת"
+                          Value="4"
+                          Subtitle="1 מנהל מערכת • 3 מנהלי משמרת"
+                          Icon="🛡️"
+                          ColorClass="text-dark" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="ממתינים להפעלה / לא פעיל"
+                          Value="2"
+                          Subtitle="נדרשת השלמת טופס קליטה"
+                          Icon="⏳"
+                          ColorClass="text-danger" />
+            </div>
+        </div>
+
+        @* פאנל סינון וחיפוש עובדים *@
+        <div class="sm-card p-3 p-md-4 mb-4">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-lg-5">
+                    <input type="text"
+                           class="form-control rounded-3"
+                           placeholder="🔍 חיפוש עובד לפי שם, אימייל או מזהה עובד..." />
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <select class="form-select rounded-3">
+                        <option value="">כל התפקידים וההרשאות</option>
+                        <option value="1">מנהל מערכת (Admin)</option>
+                        <option value="3">מנהל משמרת (Manager)</option>
+                        <option value="2">עובד מוקד / שירות (Employee)</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4 col-lg-2">
+                    <select class="form-select rounded-3">
+                        <option value="">כל המחלקות</option>
+                        <option value="service">מוקד שירות לקוחות</option>
+                        <option value="tech">מוקד תמיכה טכנית</option>
+                        <option value="control">מרחב פיקוח ובקרה</option>
+                        <option value="hq">הנהלה ראשית</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4 col-lg-2">
+                    <select class="form-select rounded-3">
+                        <option value="">כל הסטטוסים</option>
+                        <option value="active">פעיל</option>
+                        <option value="leave">בחופשה / היעדרות</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        @* טבלת עובדים והרשאות רספונסיבית *@
+        <div class="sm-card p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0">רשימת עובדים והרשאות גישה</h5>
+                    <small class="text-muted">צפייה בפרטי המשתמשים, שיוך מחלקתי ושינוי תפקיד במערכת</small>
+                </div>
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">
+                    מציג 6 עובדים מתוך 24
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>שם מלא ומזהה</th>
+                            <th>פרטי יצירת קשר</th>
+                            <th>תפקיד והרשאה</th>
+                            <th>מחלקה וסניף</th>
+                            <th>היקף משרה</th>
+                            <th>סטטוס</th>
+                            <th class="text-start">פעולות וניהול</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* שורה 1 - מנהל מערכת *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold">אלון כהן</div>
+                                <small class="text-muted">מזהה: EMP-1001</small>
+                            </td>
+                            <td>
+                                <div class="small">alon.c@shiftmaster.co.il</div>
+                                <small class="text-muted">054-8891200</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-dark text-white px-2 py-1">🛡️ מנהל מערכת</span>
+                            </td>
+                            <td>הנהלה ראשית ומטה</td>
+                            <td>
+                                <div class="small fw-semibold">100% משרה</div>
+                                <small class="text-muted">168 שעות החודש</small>
+                            </td>
+                            <td><span class="badge bg-success-subtle text-success">● פעיל</span></td>
+                            <td class="text-start">
+                                <div class="d-inline-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-primary">עריכה</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">הרשאות</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        @* שורה 2 - מנהל משמרת *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold">רועי לוי</div>
+                                <small class="text-muted">מזהה: EMP-1014</small>
+                            </td>
+                            <td>
+                                <div class="small">roei.l@shiftmaster.co.il</div>
+                                <small class="text-muted">052-4419921</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary px-2 py-1">📋 מנהל משמרת</span>
+                            </td>
+                            <td>מוקד שירות לקוחות</td>
+                            <td>
+                                <div class="small fw-semibold">100% משרה</div>
+                                <small class="text-muted">154 שעות החודש</small>
+                            </td>
+                            <td><span class="badge bg-success-subtle text-success">● פעיל</span></td>
+                            <td class="text-start">
+                                <div class="d-inline-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-primary">עריכה</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">הרשאות</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        @* שורה 3 - מנהלת משמרת *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold">שירה שטרן</div>
+                                <small class="text-muted">מזהה: EMP-1018</small>
+                            </td>
+                            <td>
+                                <div class="small">shira.s@shiftmaster.co.il</div>
+                                <small class="text-muted">050-6721183</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary px-2 py-1">📋 מנהלת משמרת</span>
+                            </td>
+                            <td>מרחב פיקוח ובקרה</td>
+                            <td>
+                                <div class="small fw-semibold">100% משרה</div>
+                                <small class="text-muted">160 שעות החודש</small>
+                            </td>
+                            <td><span class="badge bg-success-subtle text-success">● פעיל</span></td>
+                            <td class="text-start">
+                                <div class="d-inline-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-primary">עריכה</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">הרשאות</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        @* שורה 4 - עובד רגיל *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold">דניאל לוי</div>
+                                <small class="text-muted">מזהה: EMP-1022</small>
+                            </td>
+                            <td>
+                                <div class="small">daniel.l@shiftmaster.co.il</div>
+                                <small class="text-muted">053-7124098</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-2 py-1">👤 עובד מוקד</span>
+                            </td>
+                            <td>מוקד שירות לקוחות - מרכז</td>
+                            <td>
+                                <div class="small fw-semibold">80% משרה</div>
+                                <small class="text-muted">128 שעות החודש</small>
+                            </td>
+                            <td><span class="badge bg-success-subtle text-success">● פעיל</span></td>
+                            <td class="text-start">
+                                <div class="d-inline-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-primary">עריכה</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">הרשאות</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        @* שורה 5 - עובדת רגילה *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold">מיה כהן</div>
+                                <small class="text-muted">מזהה: EMP-1025</small>
+                            </td>
+                            <td>
+                                <div class="small">maya.c@shiftmaster.co.il</div>
+                                <small class="text-muted">054-3309812</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-2 py-1">👤 עובדת מוקד</span>
+                            </td>
+                            <td>מוקד תמיכה טכנית</td>
+                            <td>
+                                <div class="small fw-semibold">75% משרה</div>
+                                <small class="text-muted">112 שעות החודש</small>
+                            </td>
+                            <td><span class="badge bg-success-subtle text-success">● פעיל</span></td>
+                            <td class="text-start">
+                                <div class="d-inline-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-primary">עריכה</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">הרשאות</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        @* שורה 6 - ממתין להפעלה *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold">גיא שפירא</div>
+                                <small class="text-muted">מזהה: EMP-1030</small>
+                            </td>
+                            <td>
+                                <div class="small">guy.s@shiftmaster.co.il</div>
+                                <small class="text-muted">058-9012345</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-2 py-1">👤 עובד מוקד</span>
+                            </td>
+                            <td>סניף צפון (קופות)</td>
+                            <td>
+                                <div class="small fw-semibold">60% משרה</div>
+                                <small class="text-muted">טרם שובץ</small>
+                            </td>
+                            <td><span class="badge bg-warning-subtle text-dark">⏳ ממתין להפעלה</span></td>
+                            <td class="text-start">
+                                <div class="d-inline-flex gap-1">
+                                    <button type="button" class="btn btn-sm sm-btn-primary">הפעלת חשבון</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+}
+
+@code {
+    // דגל המציין האם המשתמש מורשה לצפות בדף ניהול המשתמשים
+    private bool isAuthorized = false;
+
+    protected override void OnInitialized()
+    {
+        // בדיקת התחברות: אם המשתמש לא מחובר, הפניה לדף הכניסה
+        if (!Session.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        // בדיקת הרשאה: רק מנהל מערכת (RoleId == 1) מורשה לנהל משתמשים והרשאות
+        if (Session.RoleId != 1)
+        {
+            Navigation.NavigateTo("/access-denied");
+            return;
+        }
+
+        isAuthorized = true;
+    }
+}

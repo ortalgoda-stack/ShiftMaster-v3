@@ -1,0 +1,254 @@
+﻿@page "/manager/shifts"
+@using API.Client.Services
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+@* דף ניהול משמרות ולוח שיבוצים (מנהל משמרת ומנהל מערכת) - תכנון סידור עבודה שבועי וטיפול בחוסרי איוש *@
+@if (isAuthorized)
+{
+    <div class="container-fluid py-3" dir="rtl">
+
+        @* כותרת דף משותפת (רכיב Shared) עם תגית תפקיד *@
+        <PageHeader Title="ניהול משמרות ולוח שיבוצים"
+                    Subtitle="תכנון סידור עבודה שבועי, שיבוץ עובדים למשמרות וטיפול בחוסרי איוש בזמן אמת"
+                    RoleBadge="ניהול שיבוצים" />
+
+        @* שורת כפתורי ניווט ופעולה מהירה *@
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+            <a href="@(Session.RoleId == 1 ? "/admin" : "/manager")" class="btn btn-outline-secondary rounded-3 fw-semibold">
+                → חזרה ללוח הבקרה
+            </a>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-primary rounded-3 fw-semibold">
+                    ✨ שיבוץ אוטומטי חכם
+                </button>
+                <button type="button" class="btn btn-outline-secondary rounded-3 fw-semibold">
+                    📥 ייצוא סידור עבודה
+                </button>
+                <button type="button" class="btn sm-btn-primary">
+                    ➕ יצירת משמרת חדשה
+                </button>
+            </div>
+        </div>
+
+        @* 4 כרטיסי KPI מרכזיים באמצעות הרכיב המשותף StatCard *@
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="סה״כ משמרות השבוע"
+                          Value="24"
+                          Subtitle="מתוכננות לכלל המחלקות (100%)"
+                          Icon="📅"
+                          ColorClass="text-primary" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="אחוז איוש שבועי"
+                          Value="92%"
+                          Subtitle="+4% מהשבוע שעבר • מעל היעד"
+                          Icon="✅"
+                          ColorClass="text-success" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="משמרות חסרות איוש"
+                          Value="2"
+                          Subtitle="דורש שיבוץ דחוף • קופות ומוקד"
+                          Icon="⚠️"
+                          ColorClass="text-danger" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="בקשות חילוף פתוחות"
+                          Value="3"
+                          Subtitle="ממתינות לאישור מנהל משמרת"
+                          Icon="🔄"
+                          ColorClass="text-dark" />
+            </div>
+        </div>
+
+        @* פאנל בחירת שבוע וסינון משמרות *@
+        <div class="sm-card p-3 p-md-4 mb-4">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-lg-4">
+                    <div class="d-flex align-items-center justify-content-between bg-light rounded-3 px-3 py-2 border">
+                        <span class="fw-bold text-primary">📅 שבוע נוכחי: 22 - 28 באוקטובר</span>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <select class="form-select rounded-3">
+                        <option value="">כל המחלקות והסניפים</option>
+                        <option value="callcenter">מוקד שירות לקוחות</option>
+                        <option value="cashier">קופות ראשי - סניף צפון</option>
+                        <option value="center">שירות מהיר - סניף מרכז</option>
+                        <option value="tech">מוקד תמיכה טכנית</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <select class="form-select rounded-3">
+                        <option value="">כל סוגי המשמרות</option>
+                        <option value="morning">בוקר (08:00 - 16:00)</option>
+                        <option value="mid">צהריים (12:00 - 20:00)</option>
+                        <option value="evening">ערב (16:00 - 00:00)</option>
+                        <option value="night">לילה (00:00 - 08:00)</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4 col-lg-2">
+                    <select class="form-select rounded-3">
+                        <option value="">כל הסטטוסים</option>
+                        <option value="full">מאויש מלא</option>
+                        <option value="missing">חסר עובד</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        @* טבלת לוח שיבוצים שבועית *@
+        <div class="sm-card p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0">פירוט שיבוצי עבודה שבועיים</h5>
+                    <small class="text-muted">סבב שבוע 43 • מעקב איוש בזמן אמת</small>
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                    <span class="badge bg-primary px-3 py-2">הכל (24)</span>
+                    <span class="badge bg-light text-dark border px-3 py-2">מאויש (22)</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2">חסר עובד (2)</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>יום ותאריך</th>
+                            <th>שעות וסוג משמרת</th>
+                            <th>מחלקה ועמדה</th>
+                            <th>אחראי עמדה</th>
+                            <th>צוות משובץ</th>
+                            <th>סטטוס איוש</th>
+                            <th class="text-start">פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* שורה 1 - מאויש מלא *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-primary">יום ראשון</div>
+                                <small class="text-muted">22/10</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary me-1">☀️ בוקר</span>
+                                <span class="fw-semibold">08:00 - 16:00</span>
+                            </td>
+                            <td class="fw-semibold">מוקד שירות לקוחות</td>
+                            <td>דניאל לוי</td>
+                            <td><span class="badge bg-light text-dark border">4 / 4 עובדים</span></td>
+                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</button>
+                            </td>
+                        </tr>
+
+                        @* שורה 2 - חסר עובד (דחוף) *@
+                        <tr class="table-danger">
+                            <td>
+                                <div class="fw-bold text-danger">יום ראשון</div>
+                                <small class="text-danger">22/10</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-dark text-white me-1">🌙 ערב</span>
+                                <span class="fw-bold text-danger">16:00 - 00:00</span>
+                            </td>
+                            <td class="fw-bold">קופות ראשי - סניף צפון</td>
+                            <td>תומר כהן</td>
+                            <td><span class="badge bg-danger text-white">3 / 4 עובדים (חסר 1)</span></td>
+                            <td><span class="badge bg-danger-subtle text-danger fw-bold">● חסר עובד</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm btn-danger fw-semibold">שבץ עובד</button>
+                            </td>
+                        </tr>
+
+                        @* שורה 3 - מאויש מלא *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold">יום שני</div>
+                                <small class="text-muted">23/10</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary me-1">☀️ בוקר</span>
+                                <span class="fw-semibold">08:00 - 16:00</span>
+                            </td>
+                            <td class="fw-semibold">מרחב פיקוח ובקרה</td>
+                            <td>שירה שטרן</td>
+                            <td><span class="badge bg-light text-dark border">6 / 6 עובדים</span></td>
+                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</button>
+                            </td>
+                        </tr>
+
+                        @* שורה 4 - מאויש מלא *@
+                        <tr>
+                            <td>
+                                <div class="fw-bold">יום שלישי</div>
+                                <small class="text-muted">24/10</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-info-subtle text-dark me-1">🌤️ צהריים</span>
+                                <span class="fw-semibold">12:00 - 20:00</span>
+                            </td>
+                            <td class="fw-semibold">שירות מהיר - סניף מרכז</td>
+                            <td>איתי ברנע</td>
+                            <td><span class="badge bg-light text-dark border">4 / 4 עובדים</span></td>
+                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</button>
+                            </td>
+                        </tr>
+
+                        @* שורה 5 - חסר עובד (דחוף) *@
+                        <tr class="table-danger">
+                            <td>
+                                <div class="fw-bold text-danger">יום רביעי</div>
+                                <small class="text-danger">25/10</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary text-white me-1">🌌 לילה</span>
+                                <span class="fw-bold text-danger">00:00 - 08:00</span>
+                            </td>
+                            <td class="fw-bold">מוקד תמיכה טכנית</td>
+                            <td>דניאל פרידמן</td>
+                            <td><span class="badge bg-danger text-white">1 / 2 עובדים (חסר 1)</span></td>
+                            <td><span class="badge bg-danger-subtle text-danger fw-bold">● חסר עובד</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm btn-danger fw-semibold">שבץ עובד</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+}
+
+@code {
+    // דגל המציין האם המשתמש מורשה לצפות בלוח השיבוצים
+    private bool isAuthorized = false;
+
+    protected override void OnInitialized()
+    {
+        // בדיקת התחברות: אם המשתמש לא מחובר, הפניה לדף הכניסה
+        if (!Session.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        // בדיקת הרשאה: רק מנהל מערכת (RoleId == 1) או מנהל משמרת (RoleId == 3) מורשים להיכנס
+        if (Session.RoleId != 1 && Session.RoleId != 3)
+        {
+            Navigation.NavigateTo("/access-denied");
+            return;
+        }
+
+        isAuthorized = true;
+    }
+}

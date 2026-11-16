@@ -1,29 +1,54 @@
 ﻿@using Model
+@using API.Client.Services
 @inject IJSRuntime JSRuntime
+@inject UserSession Session
 @inject NavigationManager Navigation
 
 <header class="p-3 mb-3 border-bottom bg-white shadow-sm" dir="rtl">
     <div class="container d-flex flex-wrap align-items-center justify-content-between">
 
-        <!-- לוגו -->
-        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none fw-bold fs-4 gap-2">
+        <!-- לוגו שמוביל לדף הבית המתאים לתפקיד -->
+        <a href="@GetHomeUrl()" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none fw-bold fs-4 gap-2">
             <span class="bg-primary text-white p-2 rounded-3 fs-5">ShiftMaster</span>
             <span class="fs-6 text-muted font-normal ms-2">ניהול משמרות חכם</span>
         </a>
 
-        <!-- תפריט ניווט -->
+        <!-- תפריט ניווט דינמי בהתאם לתפקיד המשתמש המחובר -->
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 fw-semibold">
-            <li><a href="/" class="nav-link px-3 link-primary">דף הבית</a></li>
-            <li><a href="#" class="nav-link px-3 link-dark">תוכניות</a></li>
-            <li><a href="#" class="nav-link px-3 link-dark">אודות</a></li>
-            <li><a href="#" class="nav-link px-3 link-dark">יצירת קשר</a></li>
+            @if (ActiveRoleId == 1)
+            {
+                <!-- תפריט מנהל מערכת (Admin) -->
+                <li><a href="/admin" class="nav-link px-3 link-primary">🏠 לוח בקרה ראשי</a></li>
+                <li><a href="/admin/users" class="nav-link px-3 link-dark">👥 ניהול משתמשים והרשאות</a></li>
+                <li><a href="/manager/shifts" class="nav-link px-3 link-dark">📅 לוח שיבוצים</a></li>
+            }
+            else if (ActiveRoleId == 3)
+            {
+                <!-- תפריט מנהל משמרת (Manager) -->
+                <li><a href="/manager" class="nav-link px-3 link-primary">🏠 לוח בקרה מנהל</a></li>
+                <li><a href="/manager/shifts" class="nav-link px-3 link-dark">📅 ניהול משמרות ושיבוצים</a></li>
+            }
+            else if (ActiveRoleId == 2)
+            {
+                <!-- תפריט עובד (Employee) -->
+                <li><a href="/employee" class="nav-link px-3 link-primary">🏠 המשמרות שלי</a></li>
+                <li><a href="/employee/availability" class="nav-link px-3 link-dark">📝 הגשת זמינות ואילוצים</a></li>
+            }
+            else
+            {
+                <!-- תפריט ציבורי לאורחים לא מחוברים -->
+                <li><a href="/" class="nav-link px-3 link-primary">דף הבית</a></li>
+                <li><a href="#" class="nav-link px-3 link-dark">תוכניות</a></li>
+                <li><a href="#" class="nav-link px-3 link-dark">אודות</a></li>
+                <li><a href="#" class="nav-link px-3 link-dark">יצירת קשר</a></li>
+            }
         </ul>
 
         <!-- כפתורי התחברות / אזור אישי -->
         <div class="text-end d-flex align-items-center gap-2">
-            @if (currentUser != null)
+            @if (!string.IsNullOrEmpty(ActiveUsername))
             {
-                <span class="fw-bold text-primary me-2">👋 שלום, @currentUser.Username</span>
+                <span class="fw-bold text-primary me-2">👋 שלום, @ActiveUsername</span>
                 <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" @onclick="LogoutAsync">
                     התנתק
                 </button>
@@ -40,6 +65,21 @@
 @code {
     private User? currentUser;
 
+    // חישוב שם המשתמש הפעיל מתוך Session או localStorage
+    private string? ActiveUsername => Session.IsLoggedIn ? Session.Username : currentUser?.Username;
+
+    // חישוב תפקיד המשתמש הפעיל מתוך Session או localStorage
+    private int ActiveRoleId => Session.IsLoggedIn ? Session.RoleId : (currentUser?.RoleId ?? 0);
+
+    // קביעת כתובת דף הבית בלחיצה על הלוגו לפי תפקיד
+    private string GetHomeUrl() => ActiveRoleId switch
+    {
+        1 => "/admin",
+        3 => "/manager",
+        2 => "/employee",
+        _ => "/"
+    };
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -50,6 +90,13 @@
                 if (!string.IsNullOrEmpty(userJson))
                 {
                     currentUser = System.Text.Json.JsonSerializer.Deserialize<User>(userJson);
+
+                    // סנכרון UserSession במידה ובוצע רענון דף (F5)
+                    if (currentUser != null && !Session.IsLoggedIn)
+                    {
+                        Session.Login(currentUser);
+                    }
+
                     StateHasChanged(); // רענון התצוגה לאחר טעינת המשתמש
                 }
             }
@@ -63,6 +110,7 @@
     private async Task LogoutAsync()
     {
         await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "currentUser");
+        Session.Logout();
         currentUser = null;
         Navigation.NavigateTo("/", forceLoad: true);
     }

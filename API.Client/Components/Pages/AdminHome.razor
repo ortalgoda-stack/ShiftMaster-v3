@@ -3,39 +3,218 @@
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* הצגת תוכן הדף רק אם המשתמש מחובר והתפקיד שלו הוא מנהל מערכת (RoleId == 1) *@
+@* דף ראשי של מנהל מערכת (Admin) - מציג תמונת מצב כוללת, מדדי KPI, כרטיסי ניהול וטבלת פעילות אחרונה *@
 @if (isAuthorized)
 {
-    <div class="container mt-5" dir="rtl">
-        <h1>דף ראשי - מנהל מערכת</h1>
-        <p>שלום @Session.FullName, ברוך הבא לאזור הניהול.</p>
+    <div class="container-fluid py-3" dir="rtl">
+
+        @* כותרת דף משותפת (רכיב Shared) עם תגית תפקיד *@
+        <PageHeader Title="@($"שלום, {Session.Username ?? "מנהל מערכת"} 👋")"
+                    Subtitle="סקירה יומית, פעילות צוות וסטטוס שיבוץ המשמרות לכלל הסניפים"
+                    RoleBadge="מנהל מערכת" />
+
+        @* שורת כפתורי פעולה מהירה *@
+        <div class="d-flex flex-wrap justify-content-end gap-2 mb-4">
+            <a href="/admin/users" class="btn btn-outline-primary rounded-3 fw-semibold">
+                👥 ניהול משתמשים והרשאות
+            </a>
+            <a href="/manager/shifts" class="btn sm-btn-primary">
+                ➕ יצירת משמרת / לוח שיבוצים
+            </a>
+        </div>
+
+        @* 4 כרטיסי KPI מרכזיים באמצעות הרכיב המשותף StatCard *@
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="סה״כ עובדים פעילים"
+                          Value="24"
+                          Subtitle="רשומים ב-4 מחלקות פעילות (+2 החודש)"
+                          Icon="👥"
+                          ColorClass="text-primary" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="מנהלי משמרות"
+                          Value="3"
+                          Subtitle="פעילים כעת: 2 • כיסוי מלא בוקר וערב"
+                          Icon="🛡️"
+                          ColorClass="text-dark" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="אחוז איוש שבועי"
+                          Value="94%"
+                          Subtitle="מעל היעד השבועי (90%)"
+                          Icon="📅"
+                          ColorClass="text-success" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <StatCard Title="בקשות פתוחות"
+                          Value="2"
+                          Subtitle="חילוף משמרת ואישור היעדרות"
+                          Icon="⏳"
+                          ColorClass="text-danger" />
+            </div>
+        </div>
+
+        @* 2 כרטיסי גישה מהירה למסכי הניהול הראשיים *@
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="sm-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="fw-bold mb-0">ניהול משתמשים והרשאות</h5>
+                                <small class="text-muted">צוות, תפקידים וזמינות</small>
+                            </div>
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                                24 עובדים רשומים
+                            </span>
+                        </div>
+                        <p class="text-secondary small mb-4">
+                            צפייה מרוכזת בפרופילי העובדים, הקצאת תפקידים (עובד, מנהל משמרת, מנהל מערכת) ועדכון הרשאות גישה למערכת.
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <span class="text-muted small">כל החשבונות פעילים ומאומתים</span>
+                        <a href="/admin/users" class="fw-bold text-decoration-none text-primary">
+                            מעבר לניהול משתמשים ←
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="sm-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="fw-bold mb-0">ניהול משמרות ושיבוצים</h5>
+                                <small class="text-muted">לוח שבועי ואיוש תקנים</small>
+                            </div>
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                                שבוע נוכחי פעיל
+                            </span>
+                        </div>
+                        <p class="text-secondary small mb-4">
+                            לוח שיבוץ משמרות לפי ימים ועמדות, צפייה במצב האיוש וטיפול בבקשות חילוף ואילוצי עובדים.
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <span class="text-success small fw-semibold">● כל המשמרות מאוישות להיום</span>
+                        <a href="/manager/shifts" class="fw-bold text-decoration-none text-primary">
+                            פתיחת לוח השיבוצים ←
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* טבלת פעילות אחרונה ועדכוני משמרות (נתונים קבועים לדוגמה) *@
+        <div class="sm-card p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0">פעילות אחרונה ועדכוני משמרות</h5>
+                    <small class="text-muted">מעקב שוטף אחר שינויים, בקשות החלפה ועדכוני שיבוץ</small>
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                    <span class="badge bg-primary px-3 py-2">הכל</span>
+                    <span class="badge bg-light text-dark border px-3 py-2">שיבוצים</span>
+                    <span class="badge bg-danger-subtle text-danger px-3 py-2">בקשות חילוף (2)</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>עובד / יוזם</th>
+                            <th>סוג פעולה</th>
+                            <th>משמרת / מחלקה</th>
+                            <th>תאריך ושעה</th>
+                            <th>סטטוס</th>
+                            <th class="text-start">פעולה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="fw-bold">דניאל לוי</div>
+                                <small class="text-muted">נציג שירות בכיר</small>
+                            </td>
+                            <td><span class="badge bg-danger-subtle text-danger">חילוף משמרת</span></td>
+                            <td>משמרת ערב - סניף מרכז</td>
+                            <td class="text-muted small">היום, 14:22</td>
+                            <td><span class="badge bg-warning-subtle text-dark">ממתין לבדיקה</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm sm-btn-primary">אישור מהיר</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="fw-bold">נועה אברהם</div>
+                                <small class="text-muted">אחראית צוות</small>
+                            </td>
+                            <td><span class="badge bg-success-subtle text-success">אישור שיבוץ</span></td>
+                            <td>משמרת בוקר - מוקד תמיכה</td>
+                            <td class="text-muted small">היום, 11:05</td>
+                            <td><span class="badge bg-success-subtle text-success">אושר</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">פרטים</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="fw-bold">גיא שפירא</div>
+                                <small class="text-muted">קופאי</small>
+                            </td>
+                            <td><span class="badge bg-danger-subtle text-danger">בקשת היעדרות</span></td>
+                            <td>משמרת צהריים - קופות ראשי</td>
+                            <td class="text-muted small">היום, 09:40</td>
+                            <td><span class="badge bg-warning-subtle text-dark">ממתין לבדיקה</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm sm-btn-primary">אישור מהיר</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="fw-bold">מיה כהן</div>
+                                <small class="text-muted">נציגת שירות</small>
+                            </td>
+                            <td><span class="badge bg-primary-subtle text-primary">עדכון שעות</span></td>
+                            <td>משמרת לילה - מוקד תמיכה</td>
+                            <td class="text-muted small">אתמול, 18:40</td>
+                            <td><span class="badge bg-primary-subtle text-primary">בוצע</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">פרטים</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 }
 
 @code {
-    // משתנה עזר המציין האם למשתמש יש הרשאה לצפות בדף
+    // דגל המציין האם המשתמש מורשה לצפות בדף מנהל המערכת
     private bool isAuthorized = false;
 
-    // פעולה הרצה בעת טעינת הדף ובודקת את הרשאות המשתמש המחובר
     protected override void OnInitialized()
     {
-        // בדיקה האם קיים משתמש מחובר במערכת
+        // בדיקת התחברות: אם המשתמש לא מחובר, הפניה לדף הכניסה
         if (!Session.IsLoggedIn)
         {
-            // אורח שאינו מחובר מועבר לדף הכניסה
             Navigation.NavigateTo("/login");
             return;
         }
 
-        // בדיקה האם תפקיד המשתמש המחובר מתאים לדף מנהל מערכת (RoleId == 1)
+        // בדיקת הרשאה: רק מנהל מערכת (RoleId == 1) מורשה להיכנס לדף זה
         if (Session.RoleId != 1)
         {
-            // למשתמש אין הרשאה מתאימה ולכן מועבר לדף אין הרשאה
             Navigation.NavigateTo("/access-denied");
             return;
         }
 
-        // המשתמש מחובר ובעל תפקיד מתאים - מאשרים הצגת התוכן
         isAuthorized = true;
     }
 }

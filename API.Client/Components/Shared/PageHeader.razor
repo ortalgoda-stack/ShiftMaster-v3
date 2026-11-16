@@ -1,0 +1,24 @@
+﻿@* רכיב משותף להצגת כותרת עליונה ותיאור אחיד בראש כל דף פנימי במערכת *@
+<div class="sm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3" dir="rtl">
+    <div>
+        <h2 class="fw-bold mb-1">@Title</h2>
+        <p class="mb-0 opacity-75 small">@Subtitle</p>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(RoleBadge))
+    {
+        <span class="badge bg-light text-primary fs-6 px-3 py-2 rounded-pill align-self-start align-self-md-center">
+            @RoleBadge
+        </span>
+    }
+</div>
+
+@code {
+    // כותרת ראשית של הדף
+    [Parameter] public string Title { get; set; } = string.Empty;
+
+    // תיאור קצר מתחת לכותרת
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+
+    // תגית המציגה את תפקיד המשתמש הצופה בדף (אופציונלי)
+    [Parameter] public string? RoleBadge { get; set; }
+}

@@ -3,39 +3,204 @@
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* הצגת תוכן הדף רק אם המשתמש מחובר והתפקיד שלו הוא עובד (RoleId == 2) *@
+@* דף ראשי של עובד (Employee) - מציג תזכורת למשמרת הבאה, מדדים אישיים וטבלת משמרות קרובות *@
 @if (isAuthorized)
 {
-    <div class="container mt-5" dir="rtl">
-        <h1>דף ראשי - עובד</h1>
-        <p>שלום @Session.FullName, כאן תוכל להגיש זמינות ולצפות במשמרות שלך.</p>
+    <div class="container-fluid py-3" dir="rtl">
+
+        @* כותרת דף משותפת (רכיב Shared) עם תגית תפקיד *@
+        <PageHeader Title="@($"שלום, {Session.Username ?? "דניאל לוי"} 👋")"
+                    Subtitle="מוקד שירות לקוחות - סניף מרכז • צפייה בלוח המשמרות האישי והגשת זמינות"
+                    RoleBadge="עובד מוקד" />
+
+        @* שורת כפתורי פעולה מהירה *@
+        <div class="d-flex flex-wrap justify-content-end gap-2 mb-4">
+            <a href="/employee/availability" class="btn btn-outline-primary rounded-3 fw-semibold">
+                🔄 בקשת החלפת משמרת
+            </a>
+            <a href="/employee/availability" class="btn sm-btn-primary">
+                📅 הגשת זמינות ואילוצים
+            </a>
+        </div>
+
+        @* באנר תזכורת למשמרת הבאה *@
+        <div class="alert alert-primary border-0 rounded-4 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 p-3 p-md-4 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="fs-3">⏰</div>
+                <div>
+                    <div class="fw-bold text-primary-emphasis">
+                        המשמרת הבאה שלך: מחר (יום רביעי), 08:00 - 16:00
+                    </div>
+                    <small class="text-secondary">
+                        מוקד שירות לקוחות, עמדה 14. נא להגיע 10 דקות לפני תחילת המשמרת לתדריך בוקר.
+                    </small>
+                </div>
+            </div>
+            <a href="/employee/availability" class="btn btn-primary rounded-3 fw-semibold align-self-start align-self-md-center">
+                עדכון אילוצים לשבוע הבא
+            </a>
+        </div>
+
+        @* 3 כרטיסי KPI אישיים באמצעות הרכיב המשותף StatCard *@
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <StatCard Title="המשמרות שלי השבוע"
+                          Value="4"
+                          Subtitle="2 משמרות בוקר • 2 משמרות ערב"
+                          Icon="📅"
+                          ColorClass="text-primary" />
+            </div>
+            <div class="col-12 col-md-4">
+                <StatCard Title="סה״כ שעות מתוכננות"
+                          Value="32 / 35"
+                          Subtitle="91% עמידה ביעד השבועי"
+                          Icon="⏱️"
+                          ColorClass="text-dark" />
+            </div>
+            <div class="col-12 col-md-4">
+                <StatCard Title="סטטוס זמינות לשבוע הבא"
+                          Value="הוגש בזמן"
+                          Subtitle="מועד סופי לעדכון: יום ה׳ 20:00"
+                          Icon="✅"
+                          ColorClass="text-success" />
+            </div>
+        </div>
+
+        @* טבלה רספונסיבית: המשמרות הקרובות שלי *@
+        <div class="sm-card p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0">המשמרות הקרובות שלי <span class="badge bg-primary-subtle text-primary ms-1">5 רשומות</span></h5>
+                    <small class="text-muted">לוח משמרות אישי ומאושר לשבועיים הקרובים</small>
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                    <span class="badge bg-primary px-3 py-2">הכל (5)</span>
+                    <span class="badge bg-light text-dark border px-3 py-2">השבוע הנוכחי</span>
+                    <span class="badge bg-light text-dark border px-3 py-2">שבוע הבא</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>יום</th>
+                            <th>תאריך</th>
+                            <th>שעות וסוג משמרת</th>
+                            <th>עמדה / מחלקה</th>
+                            <th>אחראי משמרת</th>
+                            <th>סטטוס משמרת</th>
+                            <th class="text-start">פעולה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* שורה 1 - המשמרת הקרובה *@
+                        <tr class="table-primary">
+                            <td class="fw-bold">● יום רביעי</td>
+                            <td class="text-muted small">25 באוקטובר</td>
+                            <td>
+                                <span class="fw-bold">בוקר (08:00 - 16:00)</span>
+                                <small class="text-muted d-block">8 שעות</small>
+                            </td>
+                            <td>מוקד שירות לקוחות (עמדה 14)</td>
+                            <td>רועי לוי</td>
+                            <td><span class="badge bg-primary text-white">המשמרת הקרובה</span></td>
+                            <td class="text-start">
+                                <a href="/employee/availability" class="btn btn-sm btn-outline-primary">בקש החלפה</a>
+                            </td>
+                        </tr>
+
+                        @* שורה 2 *@
+                        <tr>
+                            <td class="fw-semibold">יום חמישי</td>
+                            <td class="text-muted small">26 באוקטובר</td>
+                            <td>
+                                <span class="fw-bold">ערב (16:00 - 00:00)</span>
+                                <small class="text-muted d-block">8 שעות</small>
+                            </td>
+                            <td>צ׳אט ומדיה דיגיטלית</td>
+                            <td>מיכל אברהם</td>
+                            <td><span class="badge bg-success-subtle text-success">✓ מאושרת</span></td>
+                            <td class="text-start">
+                                <a href="/employee/availability" class="btn btn-sm btn-outline-secondary">בקש החלפה</a>
+                            </td>
+                        </tr>
+
+                        @* שורה 3 - בבדיקת החלפה *@
+                        <tr>
+                            <td class="fw-semibold">יום ראשון</td>
+                            <td class="text-muted small">29 באוקטובר</td>
+                            <td>
+                                <span class="fw-bold">בוקר (08:00 - 16:00)</span>
+                                <small class="text-muted d-block">8 שעות</small>
+                            </td>
+                            <td>מוקד לקוחות VIP</td>
+                            <td>גיא כהן</td>
+                            <td><span class="badge bg-warning-subtle text-dark">⏳ בבדיקת החלפה</span></td>
+                            <td class="text-start">
+                                <button type="button" class="btn btn-sm btn-light text-muted border" disabled>ממתין לאישור</button>
+                            </td>
+                        </tr>
+
+                        @* שורה 4 *@
+                        <tr>
+                            <td class="fw-semibold">יום שני</td>
+                            <td class="text-muted small">30 באוקטובר</td>
+                            <td>
+                                <span class="fw-bold">ערב (16:00 - 00:00)</span>
+                                <small class="text-muted d-block">8 שעות</small>
+                            </td>
+                            <td>מוקד שירות לקוחות</td>
+                            <td>מיכל אברהם</td>
+                            <td><span class="badge bg-success-subtle text-success">✓ מאושרת</span></td>
+                            <td class="text-start">
+                                <a href="/employee/availability" class="btn btn-sm btn-outline-secondary">בקש החלפה</a>
+                            </td>
+                        </tr>
+
+                        @* שורה 5 *@
+                        <tr>
+                            <td class="fw-semibold">יום שלישי</td>
+                            <td class="text-muted small">31 באוקטובר</td>
+                            <td>
+                                <span class="fw-bold">בוקר (08:00 - 16:00)</span>
+                                <small class="text-muted d-block">8 שעות</small>
+                            </td>
+                            <td>דלפק קבלה ושירות</td>
+                            <td>רועי לוי</td>
+                            <td><span class="badge bg-success-subtle text-success">✓ מאושרת</span></td>
+                            <td class="text-start">
+                                <a href="/employee/availability" class="btn btn-sm btn-outline-secondary">בקש החלפה</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 }
 
 @code {
-    // משתנה עזר המציין האם למשתמש יש הרשאה לצפות בדף
+    // דגל המציין האם המשתמש מורשה לצפות בדף העובד
     private bool isAuthorized = false;
 
-    // פעולה הרצה בעת טעינת הדף ובודקת את הרשאות המשתמש המחובר
     protected override void OnInitialized()
     {
-        // בדיקה האם קיים משתמש מחובר במערכת
+        // בדיקת התחברות: אם המשתמש לא מחובר, הפניה לדף הכניסה
         if (!Session.IsLoggedIn)
         {
-            // אורח שאינו מחובר מועבר לדף הכניסה
             Navigation.NavigateTo("/login");
             return;
         }
 
-        // בדיקה האם תפקיד המשתמש המחובר מתאים לדף עובד (RoleId == 2)
+        // בדיקת הרשאה: רק עובד (RoleId == 2) מורשה להיכנס לדף זה
         if (Session.RoleId != 2)
         {
-            // למשתמש אין הרשאה מתאימה ולכן מועבר לדף אין הרשאה
             Navigation.NavigateTo("/access-denied");
             return;
         }
 
-        // המשתמש מחובר ובעל תפקיד מתאים - מאשרים הצגת התוכן
         isAuthorized = true;
     }
 }

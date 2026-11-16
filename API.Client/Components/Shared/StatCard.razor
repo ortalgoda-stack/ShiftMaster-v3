@@ -1,0 +1,30 @@
+﻿@* רכיב משותף להצגת כרטיס מדד / סטטיסטיקה בדפי הבית והניהול *@
+<div class="sm-card p-3 p-md-4 h-100" dir="rtl">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <span class="text-secondary small fw-semibold d-block mb-1">@Title</span>
+            <h3 class="fw-bold mb-1 @ColorClass">@Value</h3>
+            <span class="text-muted small">@Subtitle</span>
+        </div>
+        <div class="fs-3 bg-light rounded-3 p-2">
+            @Icon
+        </div>
+    </div>
+</div>
+
+@code {
+    // כותרת המדד (לדוגמה: משמרות השבוע)
+    [Parameter] public string Title { get; set; } = string.Empty;
+
+    // הערך המרכזי המוצג בכרטיס
+    [Parameter] public string Value { get; set; } = string.Empty;
+
+    // הסבר קצר מתחת לערך
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+
+    // אייקון ייצוגי לכרטיס
+    [Parameter] public string Icon { get; set; } = "📊";
+
+    // מחלקת צבע לטקסט המרכזי (ברירת מחדל: כחול ראשי)
+    [Parameter] public string ColorClass { get; set; } = "text-primary";
+}
