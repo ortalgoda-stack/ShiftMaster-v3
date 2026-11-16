@@ -23,7 +23,7 @@ namespace DAL
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
                 await conn.OpenAsync();
-                string query = "SELECT Id, FullName, Email, Password, RoleId, IsActive FROM users WHERE IsActive = 1";
+                string query = "SELECT Id, Username, FullName, Email, Password, RoleId, IsActive FROM users WHERE IsActive = 1";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
@@ -34,6 +34,7 @@ namespace DAL
                             users.Add(new User
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
+                                Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString()! : "",
                                 FullName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString()! : "",
                                 Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString()! : "",
                                 Password = reader["Password"] != DBNull.Value ? reader["Password"].ToString()! : "",
@@ -64,17 +65,35 @@ namespace DAL
             }
         }
 
-        // 3. הוספת משתמש חדש
+        // בדיקת כפילות שם משתמש
+        public async Task<bool> IsUsernameExistsAsync(string username)
+        {
+            using (MySqlConnection conn = new MySqlConnection(_connectionString))
+            {
+                await conn.OpenAsync();
+                string query = "SELECT COUNT(*) FROM users WHERE Username = @Username";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Username", username);
+                    long count = Convert.ToInt64(await cmd.ExecuteScalarAsync() ?? 0);
+                    return count > 0;
+                }
+            }
+        }
+
+        // 3. הוספת משתמש חדש (כולל Username!)
         public async Task<bool> AddUserAsync(User user)
         {
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
                 await conn.OpenAsync();
-                string query = @"INSERT INTO users (FullName, Email, Password, RoleId, IsActive) 
-                                VALUES (@FullName, @Email, @Password, @RoleId, 1)";
+                string query = @"INSERT INTO users (Username, FullName, Email, Password, RoleId, IsActive) 
+                                 VALUES (@Username, @FullName, @Email, @Password, @RoleId, 1)";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
+                    cmd.Parameters.AddWithValue("@Username", user.Username);
                     cmd.Parameters.AddWithValue("@FullName", user.FullName);
                     cmd.Parameters.AddWithValue("@Email", user.Email);
                     cmd.Parameters.AddWithValue("@Password", user.Password);
@@ -86,17 +105,21 @@ namespace DAL
             }
         }
 
-        // 4. אימות התחברות (Login)
-        public async Task<User?> LoginAsync(string email, string password)
+        // 4. אימות התחברות (עובד גם עם אימייל וגם עם שם משתמש!)
+        public async Task<User?> LoginAsync(string identifier, string password)
         {
             using (MySqlConnection conn = new MySqlConnection(_connectionString))
             {
                 await conn.OpenAsync();
-                string query = "SELECT Id, FullName, Email, Password, RoleId, IsActive FROM users WHERE Email = @Email AND Password = @Password AND IsActive = 1";
+                string query = @"SELECT Id, Username, FullName, Email, Password, RoleId, IsActive 
+                                 FROM users 
+                                 WHERE (Email = @Identifier OR Username = @Identifier) 
+                                   AND Password = @Password 
+                                   AND IsActive = 1";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@Identifier", identifier);
                     cmd.Parameters.AddWithValue("@Password", password);
 
                     using (var reader = await cmd.ExecuteReaderAsync())
@@ -106,10 +129,11 @@ namespace DAL
                             return new User
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
-                                FullName = reader["FullName"].ToString()!,
-                                Email = reader["Email"].ToString()!,
-                                Password = reader["Password"].ToString()!,
-                                RoleId = Convert.ToInt32(reader["RoleId"]),
+                                Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString()! : "",
+                                FullName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString()! : "",
+                                Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString()! : "",
+                                Password = reader["Password"] != DBNull.Value ? reader["Password"].ToString()! : "",
+                                RoleId = reader["RoleId"] != DBNull.Value ? Convert.ToInt32(reader["RoleId"]) : 1,
                                 IsActive = Convert.ToBoolean(reader["IsActive"])
                             };
                         }
