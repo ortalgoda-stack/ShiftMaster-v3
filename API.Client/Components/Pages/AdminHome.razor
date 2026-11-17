@@ -3,195 +3,278 @@
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* דף ראשי של מנהל מערכת (Admin) - מציג תמונת מצב כוללת, מדדי KPI, כרטיסי ניהול וטבלת פעילות אחרונה *@
+@* דף ראשי של מנהל מערכת (Admin) בעיצוב כהה ומודרני *@
 @if (isAuthorized)
 {
-    <div class="container-fluid py-3" dir="rtl">
+    <div class="sm-dark-landing p-3 p-md-4" dir="rtl">
+        <div class="sm-glow-blob-1"></div>
+        <div class="sm-glow-blob-2"></div>
 
-        @* כותרת דף משותפת (רכיב Shared) עם תגית תפקיד *@
-        <PageHeader Title="@($"שלום, {Session.Username ?? "מנהל מערכת"} 👋")"
-                    Subtitle="סקירה יומית, פעילות צוות וסטטוס שיבוץ המשמרות לכלל הסניפים"
-                    RoleBadge="מנהל מערכת" />
+        <div class="container-fluid position-relative" style="max-width: 1280px; z-index: 2;">
 
-        @* שורת כפתורי פעולה מהירה *@
-        <div class="d-flex flex-wrap justify-content-end gap-2 mb-4">
-            <a href="/admin/users" class="btn btn-outline-primary rounded-3 fw-semibold">
-                👥 ניהול משתמשים והרשאות
-            </a>
-            <a href="/manager/shifts" class="btn sm-btn-primary">
-                ➕ יצירת משמרת / לוח שיבוצים
-            </a>
-        </div>
-
-        @* 4 כרטיסי KPI מרכזיים באמצעות הרכיב המשותף StatCard *@
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-sm-6 col-xl-3">
-                <StatCard Title="סה״כ עובדים פעילים"
-                          Value="24"
-                          Subtitle="רשומים ב-4 מחלקות פעילות (+2 החודש)"
-                          Icon="👥"
-                          ColorClass="text-primary" />
-            </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <StatCard Title="מנהלי משמרות"
-                          Value="3"
-                          Subtitle="פעילים כעת: 2 • כיסוי מלא בוקר וערב"
-                          Icon="🛡️"
-                          ColorClass="text-dark" />
-            </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <StatCard Title="אחוז איוש שבועי"
-                          Value="94%"
-                          Subtitle="מעל היעד השבועי (90%)"
-                          Icon="📅"
-                          ColorClass="text-success" />
-            </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <StatCard Title="בקשות פתוחות"
-                          Value="2"
-                          Subtitle="חילוף משמרת ואישור היעדרות"
-                          Icon="⏳"
-                          ColorClass="text-danger" />
-            </div>
-        </div>
-
-        @* 2 כרטיסי גישה מהירה למסכי הניהול הראשיים *@
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-lg-6">
-                <div class="sm-card p-4 h-100 d-flex flex-column justify-content-between">
+            @* באנר עליון - לוח בקרה מנהל מערכת *@
+            <section class="sm-dark-panel mb-4">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-4">
                     <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h5 class="fw-bold mb-0">ניהול משתמשים והרשאות</h5>
-                                <small class="text-muted">צוות, תפקידים וזמינות</small>
-                            </div>
-                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
-                                24 עובדים רשומים
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <span class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-1"
+                                  style="background-color: rgba(87, 27, 193, 0.5); color: #c4abff; border: 1px solid rgba(192, 193, 255, 0.25);">
+                                <span class="material-symbols-outlined fs-6" style="color: #4cd7f6;">shield_person</span>
+                                <span>מנהל מערכת ראשי</span>
+                            </span>
+                            <span class="small" style="color: #908fa0;">
+                                שלום, @(Session.Username ?? "מנהל מערכת") 👋
                             </span>
                         </div>
-                        <p class="text-secondary small mb-4">
-                            צפייה מרוכזת בפרופילי העובדים, הקצאת תפקידים (עובד, מנהל משמרת, מנהל מערכת) ועדכון הרשאות גישה למערכת.
+                        <h1 class="fw-bold text-white mb-2">לוח בקרה - מנהל מערכת</h1>
+                        <p class="mb-0" style="color: #c7c4d7; max-width: 680px;">
+                            סקירה כוללת של מצב המערכת, פעילות צוות, איוש משמרות וסטטוס בקשות בזמן אמת לכלל הסניפים.
                         </p>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                        <span class="text-muted small">כל החשבונות פעילים ומאומתים</span>
-                        <a href="/admin/users" class="fw-bold text-decoration-none text-primary">
-                            מעבר לניהול משתמשים ←
+
+                    @* כפתורי פעולה מהירה *@
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="/admin/users" class="sm-btn-dark-secondary">
+                            <span class="material-symbols-outlined fs-5" style="color: #4cd7f6;">manage_accounts</span>
+                            <span>ניהול משתמשים והרשאות</span>
+                        </a>
+                        <a href="/manager/shifts" class="sm-btn-glow">
+                            <span class="material-symbols-outlined fs-5">add_circle</span>
+                            <span>יצירת משמרת / לוח שיבוצים</span>
                         </a>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="col-12 col-lg-6">
-                <div class="sm-card p-4 h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+            @* 4 כרטיסי KPI מרכזיים *@
+            <section class="row g-3 mb-4">
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="sm-dark-card d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <h5 class="fw-bold mb-0">ניהול משמרות ושיבוצים</h5>
-                                <small class="text-muted">לוח שבועי ואיוש תקנים</small>
+                                <div class="small" style="color: #c7c4d7;">סה״כ עובדים פעילים</div>
+                                <div class="fs-2 fw-bold text-white my-1">24</div>
                             </div>
-                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
-                                שבוע נוכחי פעיל
-                            </span>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                 style="background-color: #262a34; color: #4cd7f6;">
+                                <span class="material-symbols-outlined fs-3">groups</span>
+                            </div>
                         </div>
-                        <p class="text-secondary small mb-4">
-                            לוח שיבוץ משמרות לפי ימים ועמדות, צפייה במצב האיוש וטיפול בבקשות חילוף ואילוצי עובדים.
-                        </p>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                        <span class="text-success small fw-semibold">● כל המשמרות מאוישות להיום</span>
-                        <a href="/manager/shifts" class="fw-bold text-decoration-none text-primary">
-                            פתיחת לוח השיבוצים ←
-                        </a>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+                            <span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6;">+2 החודש</span>
+                            <span class="small" style="color: #908fa0;">4 מחלקות פעילות</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        @* טבלת פעילות אחרונה ועדכוני משמרות (נתונים קבועים לדוגמה) *@
-        <div class="sm-card p-3 p-md-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-                <div>
-                    <h5 class="fw-bold mb-0">פעילות אחרונה ועדכוני משמרות</h5>
-                    <small class="text-muted">מעקב שוטף אחר שינויים, בקשות החלפה ועדכוני שיבוץ</small>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="sm-dark-card d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small" style="color: #c7c4d7;">מנהלי משמרות</div>
+                                <div class="fs-2 fw-bold text-white my-1">3</div>
+                            </div>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                 style="background-color: #262a34; color: #c0c1ff;">
+                                <span class="material-symbols-outlined fs-3">verified_user</span>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+                            <span class="badge rounded-pill" style="background-color: rgba(128, 131, 255, 0.25); color: #e1e0ff;">● 2 פעילים כעת</span>
+                            <span class="small" style="color: #908fa0;">כיסוי מלא</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex flex-wrap gap-1">
-                    <span class="badge bg-primary px-3 py-2">הכל</span>
-                    <span class="badge bg-light text-dark border px-3 py-2">שיבוצים</span>
-                    <span class="badge bg-danger-subtle text-danger px-3 py-2">בקשות חילוף (2)</span>
+
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="sm-dark-card d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small" style="color: #c7c4d7;">אחוז איוש שבועי</div>
+                                <div class="fs-2 fw-bold text-white my-1">98%</div>
+                            </div>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                 style="background-color: #262a34; color: #4cd7f6;">
+                                <span class="material-symbols-outlined fs-3">task_alt</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-2 border-top border-secondary border-opacity-25">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span style="color: #4cd7f6;">מעל היעד (95%)</span>
+                                <span style="color: #908fa0;">98/100</span>
+                            </div>
+                            <div class="progress" style="height: 6px; background-color: #262a34;">
+                                <div class="progress-bar" style="width: 98%; background: linear-gradient(270deg, #4cd7f6, #8083ff);"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>עובד / יוזם</th>
-                            <th>סוג פעולה</th>
-                            <th>משמרת / מחלקה</th>
-                            <th>תאריך ושעה</th>
-                            <th>סטטוס</th>
-                            <th class="text-start">פעולה</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="fw-bold">דניאל לוי</div>
-                                <small class="text-muted">נציג שירות בכיר</small>
-                            </td>
-                            <td><span class="badge bg-danger-subtle text-danger">חילוף משמרת</span></td>
-                            <td>משמרת ערב - סניף מרכז</td>
-                            <td class="text-muted small">היום, 14:22</td>
-                            <td><span class="badge bg-warning-subtle text-dark">ממתין לבדיקה</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm sm-btn-primary">אישור מהיר</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="fw-bold">נועה אברהם</div>
-                                <small class="text-muted">אחראית צוות</small>
-                            </td>
-                            <td><span class="badge bg-success-subtle text-success">אישור שיבוץ</span></td>
-                            <td>משמרת בוקר - מוקד תמיכה</td>
-                            <td class="text-muted small">היום, 11:05</td>
-                            <td><span class="badge bg-success-subtle text-success">אושר</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm btn-outline-secondary">פרטים</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="fw-bold">גיא שפירא</div>
-                                <small class="text-muted">קופאי</small>
-                            </td>
-                            <td><span class="badge bg-danger-subtle text-danger">בקשת היעדרות</span></td>
-                            <td>משמרת צהריים - קופות ראשי</td>
-                            <td class="text-muted small">היום, 09:40</td>
-                            <td><span class="badge bg-warning-subtle text-dark">ממתין לבדיקה</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm sm-btn-primary">אישור מהיר</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="fw-bold">מיה כהן</div>
-                                <small class="text-muted">נציגת שירות</small>
-                            </td>
-                            <td><span class="badge bg-primary-subtle text-primary">עדכון שעות</span></td>
-                            <td>משמרת לילה - מוקד תמיכה</td>
-                            <td class="text-muted small">אתמול, 18:40</td>
-                            <td><span class="badge bg-primary-subtle text-primary">בוצע</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm btn-outline-secondary">פרטים</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="sm-dark-card d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small" style="color: #c7c4d7;">בקשות פתוחות</div>
+                                <div class="fs-2 fw-bold my-1" style="color: #e1e0ff;">2</div>
+                            </div>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                 style="background-color: #262a34; color: #d0bcff;">
+                                <span class="material-symbols-outlined fs-3">notifications_active</span>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+                            <span class="badge rounded-pill" style="background-color: rgba(87, 27, 193, 0.35); color: #e9ddff;">ממתין לאישור</span>
+                            <span class="small" style="color: #908fa0;">היום</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* 2 כרטיסי גישה מהירה למסכי הניהול הראשיים *@
+            <section class="row g-3 mb-4">
+                <div class="col-12 col-lg-6">
+                    <div class="sm-dark-card p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                     style="background-color: #262a34; color: #c0c1ff;">
+                                    <span class="material-symbols-outlined fs-3">manage_accounts</span>
+                                </div>
+                                <span class="badge rounded-pill px-3 py-2" style="background-color: #262a34; color: #4cd7f6;">
+                                    24 עובדים רשומים
+                                </span>
+                            </div>
+                            <h4 class="fw-bold text-white mb-2">ניהול משתמשים והרשאות</h4>
+                            <p class="small mb-3" style="color: #c7c4d7;">
+                                הוספת עובדים חדשים, הקצאת תפקידים (עובד, מנהל משמרת, מנהל מערכת) ועדכון הרשאות גישה למערכת.
+                            </p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
+                            <span class="small" style="color: #908fa0;">● כל החשבונות פעילים ומאומתים</span>
+                            <a href="/admin/users" class="fw-bold text-decoration-none d-inline-flex align-items-center gap-1" style="color: #c0c1ff;">
+                                <span>מעבר לניהול משתמשים</span>
+                                <span class="material-symbols-outlined fs-5">arrow_back</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="sm-dark-card p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                     style="background-color: #262a34; color: #4cd7f6;">
+                                    <span class="material-symbols-outlined fs-3">calendar_view_week</span>
+                                </div>
+                                <span class="badge rounded-pill px-3 py-2" style="background-color: #262a34; color: #c0c1ff;">
+                                    שבוע נוכחי פעיל
+                                </span>
+                            </div>
+                            <h4 class="fw-bold text-white mb-2">ניהול משמרות ושיבוצים</h4>
+                            <p class="small mb-3" style="color: #c7c4d7;">
+                                עריכת לוח השיבוצים השבועי, טיפול בחוסרי איוש, אישור החלפות פתוחות ובחינת אילוצי זמינות עובדים.
+                            </p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
+                            <span class="small fw-semibold" style="color: #4cd7f6;">● כל המשמרות מאוישות להיום</span>
+                            <a href="/manager/shifts" class="fw-bold text-decoration-none d-inline-flex align-items-center gap-1" style="color: #4cd7f6;">
+                                <span>פתיחת לוח השיבוצים</span>
+                                <span class="material-symbols-outlined fs-5">arrow_back</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* טבלת פעילות אחרונה ועדכוני משמרות *@
+            <section class="sm-dark-panel">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined" style="color: #c0c1ff;">history</span>
+                            <h4 class="fw-bold text-white mb-0">פעילות אחרונה ועדכוני משמרות</h4>
+                        </div>
+                        <small style="color: #908fa0;">מעקב שוטף אחר שינויים, בקשות החלפה ועדכוני שיבוץ</small>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge rounded-pill px-3 py-2" style="background-color: #8083ff; color: #1000a9;">הכל</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background-color: #262a34; color: #c7c4d7;">שיבוצים</span>
+                        <span class="badge rounded-pill px-3 py-2" style="background-color: rgba(147, 0, 10, 0.45); color: #ffb4ab;">בקשות חילוף (2)</span>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="sm-dark-table">
+                        <thead>
+                            <tr>
+                                <th>עובד / יוזם</th>
+                                <th>סוג פעולה</th>
+                                <th>משמרת / מחלקה</th>
+                                <th>תאריך ושעה</th>
+                                <th>סטטוס</th>
+                                <th class="text-start">פעולה</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-white">דניאל לוי</div>
+                                    <small style="color: #908fa0;">נציג שירות בכיר</small>
+                                </td>
+                                <td><span class="badge rounded-pill" style="background-color: rgba(147, 0, 10, 0.4); color: #ffb4ab;">חילוף משמרת</span></td>
+                                <td>משמרת ערב - סניף מרכז</td>
+                                <td class="small" style="color: #908fa0;">היום, 14:22</td>
+                                <td><span class="badge rounded-pill" style="background-color: rgba(87, 27, 193, 0.35); color: #e9ddff;">ממתין לבדיקה</span></td>
+                                <td class="text-start">
+                                    <button type="button" class="sm-btn-glow py-1 px-3 small">אישור מהיר</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-white">נועה אברהם</div>
+                                    <small style="color: #908fa0;">אחראית צוות</small>
+                                </td>
+                                <td><span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6;">אישור שיבוץ</span></td>
+                                <td>משמרת בוקר - מוקד תמיכה</td>
+                                <td class="small" style="color: #908fa0;">היום, 11:05</td>
+                                <td><span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6;">אושר</span></td>
+                                <td class="text-start">
+                                    <button type="button" class="sm-btn-dark-secondary py-1 px-3 small">פרטים</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-white">גיא שפירא</div>
+                                    <small style="color: #908fa0;">קופאי</small>
+                                </td>
+                                <td><span class="badge rounded-pill" style="background-color: rgba(147, 0, 10, 0.4); color: #ffb4ab;">בקשת היעדרות</span></td>
+                                <td>משמרת צהריים - קופות ראשי</td>
+                                <td class="small" style="color: #908fa0;">היום, 09:40</td>
+                                <td><span class="badge rounded-pill" style="background-color: rgba(87, 27, 193, 0.35); color: #e9ddff;">ממתין לבדיקה</span></td>
+                                <td class="text-start">
+                                    <button type="button" class="sm-btn-glow py-1 px-3 small">אישור מהיר</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-white">מיה כהן</div>
+                                    <small style="color: #908fa0;">נציגת שירות</small>
+                                </td>
+                                <td><span class="badge rounded-pill" style="background-color: rgba(128, 131, 255, 0.25); color: #e1e0ff;">עדכון שעות</span></td>
+                                <td>משמרת לילה - מוקד תמיכה</td>
+                                <td class="small" style="color: #908fa0;">אתמול, 18:40</td>
+                                <td><span class="badge rounded-pill" style="background-color: rgba(128, 131, 255, 0.25); color: #e1e0ff;">בוצע</span></td>
+                                <td class="text-start">
+                                    <button type="button" class="sm-btn-dark-secondary py-1 px-3 small">פרטים</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
         </div>
-
     </div>
 }
 

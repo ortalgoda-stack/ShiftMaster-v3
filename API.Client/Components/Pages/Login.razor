@@ -5,83 +5,105 @@
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5" dir="rtl">
-    <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 style-card">
-        <!-- Header / Logo -->
+<div class="sm-dark-landing d-flex align-items-center justify-content-center py-5 px-3" dir="rtl">
+    <div class="sm-glow-blob-1"></div>
+    <div class="sm-glow-blob-2"></div>
+
+    <div class="sm-auth-card p-4 p-md-5 position-relative" style="z-index: 2;">
+
+        <!-- חזרה לדף הבית -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="/" class="text-decoration-none d-inline-flex align-items-center gap-1 small" style="color: #c7c4d7;">
+                <span class="material-symbols-outlined fs-6">arrow_forward</span>
+                <span>חזרה לדף הבית</span>
+            </a>
+            <span class="badge rounded-pill px-2 py-1" style="background-color: rgba(0, 158, 185, 0.2); color: #4cd7f6; font-size: 0.75rem;">
+                מערכת מקוונת •
+            </span>
+        </div>
+
+        <!-- לוגו וכותרת -->
         <div class="text-center mb-4">
-            <div class="d-inline-flex align-items-center gap-2 mb-2">
-                <span class="bg-primary text-white p-2 rounded-3 fw-bold fs-4">ShiftMaster</span>
+            <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-3"
+                 style="width: 64px; height: 64px; background: linear-gradient(135deg, #571bc1, #8083ff, #009eb9); box-shadow: 0 0 25px rgba(128, 131, 255, 0.45);">
+                <span class="material-symbols-outlined text-white fs-2">calendar_clock</span>
             </div>
-            <p class="text-muted small">מערכת לניהול משמרות חכם</p>
-            <h2 class="fw-bold text-dark mt-3">התחברות למערכת</h2>
-            <p class="text-secondary small">הזן את פרטי ההתחברות שלך כדי להיכנס למערכת הניהול.</p>
+            <div class="d-flex justify-content-center align-items-center gap-2">
+                <span class="fw-bold fs-4 text-white">ShiftMaster</span>
+                <span class="badge" style="background-color: rgba(76, 215, 246, 0.15); color: #4cd7f6;">PRO</span>
+            </div>
+            <h2 class="fw-bold text-white mt-3 mb-1">ברוכים השבים</h2>
+            <p class="small mb-0" style="color: #908fa0;">הזן את פרטי ההתחברות שלך כדי להיכנס למערכת הניהול.</p>
         </div>
 
         <!-- Login Form -->
         <form @onsubmit="LoginAsync">
-            <div class="mb-3">
-                <label class="form-label fw-semibold text-secondary small">שם משתמש או דוא"ל</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white text-muted border-end-0">👤</span>
-                    <input type="text" class="form-control border-start-0" placeholder="הזן שם משתמש או אימייל" @bind="usernameOrEmail" />
+            <div class="mb-3 text-end">
+                <label class="form-label small fw-semibold" style="color: #dfe2ef;">שם משתמש או דוא"ל</label>
+                <div class="input-group sm-dark-input-group">
+                    <span class="input-group-text">
+                        <span class="material-symbols-outlined fs-5">alternate_email</span>
+                    </span>
+                    <input type="text" class="form-control" placeholder="הזן שם משתמש או אימייל" @bind="usernameOrEmail" />
                 </div>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 text-end">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label fw-semibold text-secondary small mb-0">סיסמה</label>
-                    <a href="#" class="text-primary text-decoration-none small">שכחת סיסמה?</a>
+                    <label class="form-label small fw-semibold mb-0" style="color: #dfe2ef;">סיסמה</label>
+                    <a href="#" class="text-decoration-none small" style="color: #4cd7f6;">שכחת סיסמה?</a>
                 </div>
-                <div class="input-group">
-                    <span class="input-group-text bg-white text-muted border-end-0">🔒</span>
-                    <input type="password" class="form-control border-start-0" placeholder="••••••••" @bind="password" />
+                <div class="input-group sm-dark-input-group">
+                    <span class="input-group-text">
+                        <span class="material-symbols-outlined fs-5">lock</span>
+                    </span>
+                    <input type="@(showPassword ? "text" : "password")" class="form-control" placeholder="••••••••" @bind="password" />
+                    <button type="button" class="input-group-text border-0 bg-transparent" @onclick="() => showPassword = !showPassword" title="הצג/הסתר סיסמה">
+                        <span class="material-symbols-outlined fs-5">@(showPassword ? "visibility_off" : "visibility")</span>
+                    </button>
                 </div>
             </div>
 
             <div class="form-check mb-4">
                 <input class="form-check-input" type="checkbox" id="rememberMe" />
-                <label class="form-check-label small text-secondary" for="rememberMe">
+                <label class="form-check-label small" for="rememberMe" style="color: #c7c4d7;">
                     זכור אותי במכשיר זה
                 </label>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold mb-3" disabled="@isBusy">
-                @(isBusy ? "מתחבר..." : "התחבר עכשיו ←")
+            <button type="submit" class="sm-btn-glow w-100 justify-content-center py-3 mb-3" disabled="@isBusy">
+                <span class="material-symbols-outlined fs-5">login</span>
+                <span>@(isBusy ? "מתחבר..." : "התחבר עכשיו ←")</span>
             </button>
 
             @if (errorMessage != null)
             {
-                <div class="alert alert-danger text-center p-2 rounded-3 small mt-2" role="alert">
+                <div class="alert text-center p-2 rounded-3 small mt-2" role="alert"
+                     style="background-color: rgba(147, 0, 10, 0.45); border: 1px solid #ffb4ab; color: #ffdad6;">
                     @errorMessage
                 </div>
             }
         </form>
 
         <!-- Footer Link -->
-        <div class="text-center mt-3 pt-3 border-top">
-            <span class="text-secondary small">עדיין אין לך חשבון? </span>
-            <a href="/register" class="text-primary text-decoration-none fw-bold small">הרשם כאן ></a>
+        <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+            <span class="small" style="color: #c7c4d7;">עדיין אין לך חשבון? </span>
+            <a href="/register" class="text-decoration-none fw-bold small" style="color: #c0c1ff;">הרשם כאן ></a>
         </div>
 
-        <div class="d-flex justify-content-center gap-3 text-muted small mt-4">
+        <div class="d-flex justify-content-center gap-3 small mt-4" style="color: #908fa0; font-size: 0.78rem;">
             <span>🔒 אבטחת מידע SSL מוצפנת</span>
             <span>☁️ גיבוי אוטומטי בענן</span>
         </div>
     </div>
 </div>
 
-<style>
-    .style-card {
-        max-width: 480px;
-        width: 100%;
-    }
-</style>
-
 @code {
     private string usernameOrEmail = "";
     private string password = "";
     private string? errorMessage;
     private bool isBusy = false;
+    private bool showPassword = false;
 
     private async Task LoginAsync()
     {

@@ -3,229 +3,469 @@
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* דף ניהול משמרות ולוח שיבוצים (מנהל משמרת ומנהל מערכת) - תכנון סידור עבודה שבועי וטיפול בחוסרי איוש *@
+@* דף ניהול משמרות ולוח שיבוצים (מנהל משמרת ומנהל מערכת) - מטריצת שיבוצים שבועית בעיצוב כהה *@
 @if (isAuthorized)
 {
-    <div class="container-fluid py-3" dir="rtl">
+    <div class="sm-dark-landing p-3 p-md-4" dir="rtl">
+        <div class="sm-glow-blob-1"></div>
+        <div class="sm-glow-blob-2"></div>
 
-        @* כותרת דף משותפת (רכיב Shared) עם תגית תפקיד *@
-        <PageHeader Title="ניהול משמרות ולוח שיבוצים"
-                    Subtitle="תכנון סידור עבודה שבועי, שיבוץ עובדים למשמרות וטיפול בחוסרי איוש בזמן אמת"
-                    RoleBadge="ניהול שיבוצים" />
+        <div class="container-fluid position-relative" style="max-width: 1400px; z-index: 2;">
 
-        @* שורת כפתורי ניווט ופעולה מהירה *@
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-            <a href="@(Session.RoleId == 1 ? "/admin" : "/manager")" class="btn btn-outline-secondary rounded-3 fw-semibold">
-                → חזרה ללוח הבקרה
-            </a>
-            <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-primary rounded-3 fw-semibold">
-                    ✨ שיבוץ אוטומטי חכם
-                </button>
-                <button type="button" class="btn btn-outline-secondary rounded-3 fw-semibold">
-                    📥 ייצוא סידור עבודה
-                </button>
-                <button type="button" class="btn sm-btn-primary">
-                    ➕ יצירת משמרת חדשה
-                </button>
-            </div>
-        </div>
+            @* פס ניווט וסטטוס סנכרון *@
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2 small" style="color: #c7c4d7;">
+                    <a href="@(Session.RoleId == 1 ? "/admin" : "/manager")"
+                       class="text-decoration-none d-inline-flex align-items-center gap-1"
+                       style="color: #908fa0;">
+                        <span class="material-symbols-outlined fs-6">arrow_forward</span>
+                        <span>חזרה ללוח הבקרה</span>
+                    </a>
+                    <span style="color: #464554;">|</span>
+                    <span style="color: #4cd7f6;">ניהול משמרות ושיבוצים</span>
+                </div>
 
-        @* 4 כרטיסי KPI מרכזיים באמצעות הרכיב המשותף StatCard *@
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-sm-6 col-xl-3">
-                <StatCard Title="סה״כ משמרות השבוע"
-                          Value="24"
-                          Subtitle="מתוכננות לכלל המחלקות (100%)"
-                          Icon="📅"
-                          ColorClass="text-primary" />
+                <div class="badge rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
+                     style="background-color: #262a34; color: #dfe2ef;">
+                    <span class="rounded-circle" style="width: 8px; height: 8px; background-color: #4cd7f6; box-shadow: 0 0 8px #4cd7f6;"></span>
+                    <span>שבוע 44 פתוח לעריכה • סנכרון נתונים פעיל</span>
+                </div>
             </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <StatCard Title="אחוז איוש שבועי"
-                          Value="92%"
-                          Subtitle="+4% מהשבוע שעבר • מעל היעד"
-                          Icon="✅"
-                          ColorClass="text-success" />
-            </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <StatCard Title="משמרות חסרות איוש"
-                          Value="2"
-                          Subtitle="דורש שיבוץ דחוף • קופות ומוקד"
-                          Icon="⚠️"
-                          ColorClass="text-danger" />
-            </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <StatCard Title="בקשות חילוף פתוחות"
-                          Value="3"
-                          Subtitle="ממתינות לאישור מנהל משמרת"
-                          Icon="🔄"
-                          ColorClass="text-dark" />
-            </div>
-        </div>
 
-        @* פאנל בחירת שבוע וסינון משמרות *@
-        <div class="sm-card p-3 p-md-4 mb-4">
-            <div class="row g-2 align-items-center">
-                <div class="col-12 col-lg-4">
-                    <div class="d-flex align-items-center justify-content-between bg-light rounded-3 px-3 py-2 border">
-                        <span class="fw-bold text-primary">📅 שבוע נוכחי: 22 - 28 באוקטובר</span>
+            @* באנר כותרת וכפתורי פעולה *@
+            <section class="sm-dark-panel mb-4">
+                <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-end gap-4">
+                    <div>
+                        <h1 class="fw-bold text-white mb-2">ניהול משמרות ולוח שיבוצים</h1>
+                        <p class="mb-0" style="color: #c7c4d7; max-width: 680px;">
+                            תכנון שבועי, איוש עמדות ומעקב אילוצים בזמן אמת בליווי שיבוץ חכם.
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="sm-btn-dark-secondary">
+                            <span class="material-symbols-outlined fs-5" style="color: #908fa0;">file_download</span>
+                            <span>ייצוא לוח</span>
+                        </button>
+                        <button type="button" class="sm-btn-dark-secondary">
+                            <span class="material-symbols-outlined fs-5" style="color: #4cd7f6;">auto_awesome</span>
+                            <span style="color: #4cd7f6;">שיבוץ חכם (AI)</span>
+                        </button>
+                        <button type="button" class="sm-btn-dark-secondary">
+                            <span class="material-symbols-outlined fs-5" style="color: #c0c1ff;">send</span>
+                            <span>פרסום לוח שבועי</span>
+                        </button>
+                        <button type="button" class="sm-btn-glow">
+                            <span class="material-symbols-outlined fs-5">add</span>
+                            <span>יצירת משמרת חדשה</span>
+                        </button>
                     </div>
                 </div>
-                <div class="col-12 col-md-4 col-lg-3">
-                    <select class="form-select rounded-3">
-                        <option value="">כל המחלקות והסניפים</option>
-                        <option value="callcenter">מוקד שירות לקוחות</option>
-                        <option value="cashier">קופות ראשי - סניף צפון</option>
-                        <option value="center">שירות מהיר - סניף מרכז</option>
-                        <option value="tech">מוקד תמיכה טכנית</option>
-                    </select>
+
+                @* סרגל ניווט שבועי, בחירת סניף ותצוגות *@
+                <div class="row g-3 align-items-center mt-3 pt-3 border-top border-secondary border-opacity-25">
+                    <div class="col-12 col-lg-5">
+                        <div class="d-flex align-items-center justify-content-between rounded-3 p-1"
+                             style="background-color: #0a0e17;">
+                            <button type="button" class="btn btn-sm text-secondary border-0" title="שבוע קודם">
+                                <span class="material-symbols-outlined fs-5">chevron_right</span>
+                            </button>
+                            <div class="d-flex align-items-center gap-2 small">
+                                <span class="material-symbols-outlined fs-5" style="color: #c0c1ff;">calendar_month</span>
+                                <span class="fw-bold text-white">שבוע 44: 27 אוק׳ – 02 נוב׳</span>
+                                <span class="badge rounded-pill" style="background-color: rgba(128, 131, 255, 0.25); color: #c0c1ff;">נוכחי</span>
+                            </div>
+                            <button type="button" class="btn btn-sm text-secondary border-0" title="שבוע הבא">
+                                <span class="material-symbols-outlined fs-5">chevron_left</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="input-group sm-dark-input-group">
+                            <span class="input-group-text">
+                                <span class="material-symbols-outlined fs-5" style="color: #4cd7f6;">domain</span>
+                            </span>
+                            <select class="form-select">
+                                <option value="main" style="background-color: #181b25;">סניף תל אביב – מוקד ראשי</option>
+                                <option value="support" style="background-color: #181b25;">מוקד שירות ותמיכה טכנית</option>
+                                <option value="vip" style="background-color: #181b25;">מוקד לקוחות VIP</option>
+                                <option value="logistics" style="background-color: #181b25;">מרכז תפעול ולוגיסטיקה</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-3 d-flex justify-content-lg-end">
+                        <div class="d-inline-flex gap-1 p-1 rounded-3" style="background-color: #0a0e17;">
+                            <span class="badge px-3 py-2 rounded-2 d-inline-flex align-items-center gap-1"
+                                  style="background-color: #8083ff; color: #1000a9;">
+                                <span class="material-symbols-outlined" style="font-size: 15px;">view_week</span>
+                                <span>שבועי</span>
+                            </span>
+                            <span class="badge px-2 py-2 d-inline-flex align-items-center gap-1" style="color: #908fa0;">
+                                <span class="material-symbols-outlined" style="font-size: 15px;">view_day</span>
+                                <span>יומי</span>
+                            </span>
+                            <span class="badge px-2 py-2 d-inline-flex align-items-center gap-1" style="color: #908fa0;">
+                                <span class="material-symbols-outlined" style="font-size: 15px;">view_list</span>
+                                <span>רשימה</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-12 col-md-4 col-lg-3">
-                    <select class="form-select rounded-3">
-                        <option value="">כל סוגי המשמרות</option>
-                        <option value="morning">בוקר (08:00 - 16:00)</option>
-                        <option value="mid">צהריים (12:00 - 20:00)</option>
-                        <option value="evening">ערב (16:00 - 00:00)</option>
-                        <option value="night">לילה (00:00 - 08:00)</option>
-                    </select>
+            </section>
+
+            @* 4 כרטיסי KPI מרכזיים *@
+            <section class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="sm-dark-card d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small" style="color: #c7c4d7;">סה״כ משמרות מתוכננות</div>
+                            <div class="fs-2 fw-bold text-white mt-1">42</div>
+                        </div>
+                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                             style="background-color: #262a34; color: #c0c1ff;">
+                            <span class="material-symbols-outlined fs-3">calendar_view_week</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-12 col-md-4 col-lg-2">
-                    <select class="form-select rounded-3">
-                        <option value="">כל הסטטוסים</option>
-                        <option value="full">מאויש מלא</option>
-                        <option value="missing">חסר עובד</option>
-                    </select>
+
+                <div class="col-6 col-lg-3">
+                    <div class="sm-dark-card d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="small" style="color: #c7c4d7;">מאוישות בהצלחה</span>
+                                <span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; font-size: 0.7rem;">90%</span>
+                            </div>
+                            <div class="fs-2 fw-bold mt-1" style="color: #4cd7f6;">38</div>
+                        </div>
+                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                             style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6;">
+                            <span class="material-symbols-outlined fs-3">how_to_reg</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <div class="col-6 col-lg-3">
+                    <div class="sm-dark-card d-flex justify-content-between align-items-center"
+                         style="border-color: rgba(255, 180, 171, 0.35);">
+                        <div>
+                            <div class="small fw-semibold" style="color: #ffb4ab;">חסרות איוש / דרוש עובד</div>
+                            <div class="fs-2 fw-bold mt-1" style="color: #ffb4ab;">4</div>
+                        </div>
+                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                             style="background-color: rgba(147, 0, 10, 0.35); color: #ffb4ab;">
+                            <span class="material-symbols-outlined fs-3">warning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-3">
+                    <div class="sm-dark-card d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small" style="color: #c7c4d7;">אילוצים ובקשות פתוחות</div>
+                            <div class="fs-2 fw-bold mt-1" style="color: #d0bcff;">5</div>
+                        </div>
+                        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                             style="background-color: rgba(87, 27, 193, 0.35); color: #d0bcff;">
+                            <span class="material-symbols-outlined fs-3">rule</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* מטריצת שיבוצים שבועית 7 ימים (ראשון - שבת) *@
+            <section class="sm-dark-panel p-3">
+                <div class="table-responsive">
+                    <table class="table table-borderless align-top mb-0" style="min-width: 1200px; border-collapse: separate; border-spacing: 8px;">
+                        <thead>
+                            <tr>
+                                <th class="rounded-3 p-3 align-middle" style="width: 165px; background-color: #262a34; color: #dfe2ef;">
+                                    <div class="d-flex align-items-center gap-2 small fw-bold">
+                                        <span class="material-symbols-outlined fs-5" style="color: #908fa0;">layers</span>
+                                        <span>משמרת \ יום</span>
+                                    </div>
+                                </th>
+                                <th class="rounded-3 p-2 text-center" style="background-color: #0a0e17;">
+                                    <div class="fw-bold text-white">ראשון</div>
+                                    <small style="color: #908fa0;">27 אוקטובר</small>
+                                </th>
+                                <th class="rounded-3 p-2 text-center" style="background-color: #0a0e17;">
+                                    <div class="fw-bold text-white">שני</div>
+                                    <small style="color: #908fa0;">28 אוקטובר</small>
+                                </th>
+                                <th class="rounded-3 p-2 text-center" style="background-color: #0a0e17;">
+                                    <div class="fw-bold text-white">שלישי</div>
+                                    <small style="color: #908fa0;">29 אוקטובר</small>
+                                </th>
+                                <th class="rounded-3 p-2 text-center" style="background-color: rgba(128, 131, 255, 0.25); border: 1px solid rgba(192, 193, 255, 0.3);">
+                                    <div class="fw-bold" style="color: #c0c1ff;">רביעי</div>
+                                    <small style="color: #e1e0ff;">30 אוקטובר (היום)</small>
+                                </th>
+                                <th class="rounded-3 p-2 text-center" style="background-color: #0a0e17;">
+                                    <div class="fw-bold text-white">חמישי</div>
+                                    <small style="color: #908fa0;">31 אוקטובר</small>
+                                </th>
+                                <th class="rounded-3 p-2 text-center" style="background-color: #0a0e17;">
+                                    <div class="fw-bold" style="color: #c7c4d7;">שישי</div>
+                                    <small style="color: #4cd7f6;">01 נוב׳ • מקוצר</small>
+                                </th>
+                                <th class="rounded-3 p-2 text-center" style="background-color: #0a0e17;">
+                                    <div class="fw-bold" style="color: #c7c4d7;">שבת</div>
+                                    <small style="color: #d0bcff;">02 נוב׳ • כוננות</small>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @* שורה 1: משמרת בוקר *@
+                            <tr>
+                                <td class="rounded-3 p-3" style="background-color: #1c1f29;">
+                                    <div class="d-flex align-items-center gap-1 fw-bold text-white mb-1">
+                                        <span class="material-symbols-outlined fs-5" style="color: #c0c1ff;">light_mode</span>
+                                        <span>משמרת בוקר</span>
+                                    </div>
+                                    <div class="small mb-2" style="color: #4cd7f6;">08:00 - 16:30</div>
+                                    <span class="badge rounded-2" style="background-color: #31353f; color: #c7c4d7;">דרישה: 3 עובדים</span>
+                                </td>
+
+                                @* ראשון בוקר *@
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; font-size: 0.7rem;">3/3 מאויש</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 d-flex justify-content-between align-items-center" style="background-color: #0a0e17;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #c0c1ff; color: #1000a9;">דב</span>
+                                                <div class="lh-1">
+                                                    <div class="small fw-semibold text-white">דן בן-דוד</div>
+                                                    <small style="color: #c0c1ff; font-size: 0.65rem;">אחמ״ש</small>
+                                                </div>
+                                            </div>
+                                            <span class="material-symbols-outlined" style="font-size: 14px; color: #c0c1ff;">star</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #571bc1; color: #c4abff;">שכ</span>
+                                            <span class="small text-white">שירה כהן</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">נג</span>
+                                            <span class="small text-white">נועה גולן</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                @* שני בוקר *@
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; font-size: 0.7rem;">3/3 מאויש</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 d-flex justify-content-between align-items-center" style="background-color: #0a0e17;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #c0c1ff; color: #1000a9;">רק</span>
+                                                <div class="lh-1">
+                                                    <div class="small fw-semibold text-white">רועי קליין</div>
+                                                    <small style="color: #c0c1ff; font-size: 0.65rem;">אחמ״ש</small>
+                                                </div>
+                                            </div>
+                                            <span class="material-symbols-outlined" style="font-size: 14px; color: #c0c1ff;">star</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">אמ</span>
+                                            <span class="small text-white">איתי מזרחי</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">לש</span>
+                                            <span class="small text-white">לירון שפירא</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                @* שלישי בוקר *@
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; font-size: 0.7rem;">3/3 מאויש</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 d-flex justify-content-between align-items-center" style="background-color: #0a0e17;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #c0c1ff; color: #1000a9;">דב</span>
+                                                <div class="lh-1">
+                                                    <div class="small fw-semibold text-white">דן בן-דוד</div>
+                                                    <small style="color: #c0c1ff; font-size: 0.65rem;">אחמ״ש</small>
+                                                </div>
+                                            </div>
+                                            <span class="material-symbols-outlined" style="font-size: 14px; color: #c0c1ff;">star</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">הב</span>
+                                            <span class="small text-white">הגר ברק</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">טפ</span>
+                                            <span class="small text-white">טל פרידמן</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                @* רביעי בוקר (היום) *@
+                                <td class="rounded-3 p-2" style="background-color: #262a34; border: 1px solid rgba(128, 131, 255, 0.35);">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.35); color: #4cd7f6; font-size: 0.7rem;">3/3 פעיל עכשיו</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 d-flex justify-content-between align-items-center" style="background-color: #0a0e17;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #c0c1ff; color: #1000a9;">רק</span>
+                                                <div class="lh-1">
+                                                    <div class="small fw-semibold text-white">רועי קליין</div>
+                                                    <small style="color: #c0c1ff; font-size: 0.65rem;">אחמ״ש</small>
+                                                </div>
+                                            </div>
+                                            <span class="material-symbols-outlined" style="font-size: 14px; color: #c0c1ff;">star</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">שכ</span>
+                                            <span class="small text-white">שירה כהן</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">עא</span>
+                                            <span class="small text-white">עומר אלוני</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                @* חמישי בוקר (חסר עובד!) *@
+                                <td class="rounded-3 p-2" style="background-color: rgba(147, 0, 10, 0.25); border: 1px solid rgba(255, 180, 171, 0.35);">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill fw-bold" style="background-color: rgba(255, 180, 171, 0.2); color: #ffb4ab; font-size: 0.7rem;">2/3 חסר עובד!</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 d-flex justify-content-between align-items-center" style="background-color: #0a0e17;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #c0c1ff; color: #1000a9;">דב</span>
+                                                <div class="lh-1">
+                                                    <div class="small fw-semibold text-white">דן בן-דוד</div>
+                                                    <small style="color: #c0c1ff; font-size: 0.65rem;">אחמ״ש</small>
+                                                </div>
+                                            </div>
+                                            <span class="material-symbols-outlined" style="font-size: 14px; color: #c0c1ff;">star</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">נג</span>
+                                            <span class="small text-white">נועה גולן</span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm w-100 fw-bold rounded-2 mt-1 d-flex align-items-center justify-content-center gap-1"
+                                                style="background-color: #ffb4ab; color: #690005; font-size: 0.75rem;">
+                                            <span class="material-symbols-outlined" style="font-size: 15px;">person_add</span>
+                                            <span>שבץ עובד מהיר</span>
+                                        </button>
+                                    </div>
+                                </td>
+
+                                @* שישי בוקר *@
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; font-size: 0.7rem;">2/2 מקוצרת</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">טפ</span>
+                                            <span class="small text-white">טל פרידמן</span>
+                                        </div>
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">אל</span>
+                                            <span class="small text-white">אליאור לוי</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                @* שבת כוננות *@
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill" style="background-color: rgba(87, 27, 193, 0.45); color: #e9ddff; font-size: 0.7rem;">1/1 כוננות</span>
+                                    </div>
+                                    <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                        <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #571bc1; color: #c4abff;">דש</span>
+                                        <span class="small text-white">דוד שלום</span>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            @* שורה 2: משמרת ערב *@
+                            <tr>
+                                <td class="rounded-3 p-3" style="background-color: #1c1f29;">
+                                    <div class="d-flex align-items-center gap-1 fw-bold text-white mb-1">
+                                        <span class="material-symbols-outlined fs-5" style="color: #d0bcff;">dark_mode</span>
+                                        <span>משמרת ערב</span>
+                                    </div>
+                                    <div class="small mb-2" style="color: #d0bcff;">16:00 - 00:00</div>
+                                    <span class="badge rounded-2" style="background-color: #31353f; color: #c7c4d7;">דרישה: 2 עובדים</span>
+                                </td>
+
+                                @* ראשון ערב (חסר עובד!) *@
+                                <td class="rounded-3 p-2" style="background-color: rgba(147, 0, 10, 0.25); border: 1px solid rgba(255, 180, 171, 0.35);">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge rounded-pill fw-bold" style="background-color: rgba(255, 180, 171, 0.2); color: #ffb4ab; font-size: 0.7rem;">1/2 חסר עובד!</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 d-flex align-items-center gap-2" style="background-color: #0a0e17;">
+                                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width: 24px; height: 24px; font-size: 0.65rem; background-color: #31353f; color: #dfe2ef;">תכ</span>
+                                            <span class="small text-white">תומר כהן</span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm w-100 fw-bold rounded-2 mt-1 d-flex align-items-center justify-content-center gap-1"
+                                                style="background-color: #ffb4ab; color: #690005; font-size: 0.75rem;">
+                                            <span class="material-symbols-outlined" style="font-size: 15px;">person_add</span>
+                                            <span>שבץ עובד מהיר</span>
+                                        </button>
+                                    </div>
+                                </td>
+
+                                @* שני - שבת ערב (מאוישים) *@
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <span class="badge rounded-pill mb-2" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; font-size: 0.7rem;">2/2 מאויש</span>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">מיכל אברהם</div>
+                                        <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">עומר אלוני</div>
+                                    </div>
+                                </td>
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <span class="badge rounded-pill mb-2" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; font-size: 0.7rem;">2/2 מאויש</span>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">איתי ברנע</div>
+                                        <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">שירה כהן</div>
+                                    </div>
+                                </td>
+                                <td class="rounded-3 p-2" style="background-color: #262a34; border: 1px solid rgba(128, 131, 255, 0.35);">
+                                    <span class="badge rounded-pill mb-2" style="background-color: rgba(0, 158, 185, 0.35); color: #4cd7f6; font-size: 0.7rem;">2/2 מתוכנן</span>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">נועה גולן</div>
+                                        <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">דניאל לוי</div>
+                                    </div>
+                                </td>
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <span class="badge rounded-pill mb-2" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; font-size: 0.7rem;">2/2 מאויש</span>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">תומר כהן</div>
+                                        <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">לירון שפירא</div>
+                                    </div>
+                                </td>
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <span class="badge rounded-pill mb-2" style="background-color: #262a34; color: #908fa0; font-size: 0.7rem;">סגור</span>
+                                    <div class="small fst-italic" style="color: #908fa0;">אין פעילות ערב</div>
+                                </td>
+                                <td class="rounded-3 p-2" style="background-color: #1c1f29;">
+                                    <span class="badge rounded-pill mb-2" style="background-color: rgba(87, 27, 193, 0.45); color: #e9ddff; font-size: 0.7rem;">1/1 מוצ״ש</span>
+                                    <div class="rounded-2 p-2 small text-white" style="background-color: #0a0e17;">רועי קליין</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
         </div>
-
-        @* טבלת לוח שיבוצים שבועית *@
-        <div class="sm-card p-3 p-md-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-                <div>
-                    <h5 class="fw-bold mb-0">פירוט שיבוצי עבודה שבועיים</h5>
-                    <small class="text-muted">סבב שבוע 43 • מעקב איוש בזמן אמת</small>
-                </div>
-                <div class="d-flex flex-wrap gap-1">
-                    <span class="badge bg-primary px-3 py-2">הכל (24)</span>
-                    <span class="badge bg-light text-dark border px-3 py-2">מאויש (22)</span>
-                    <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2">חסר עובד (2)</span>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>יום ותאריך</th>
-                            <th>שעות וסוג משמרת</th>
-                            <th>מחלקה ועמדה</th>
-                            <th>אחראי עמדה</th>
-                            <th>צוות משובץ</th>
-                            <th>סטטוס איוש</th>
-                            <th class="text-start">פעולות</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @* שורה 1 - מאויש מלא *@
-                        <tr>
-                            <td>
-                                <div class="fw-bold text-primary">יום ראשון</div>
-                                <small class="text-muted">22/10</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-primary-subtle text-primary me-1">☀️ בוקר</span>
-                                <span class="fw-semibold">08:00 - 16:00</span>
-                            </td>
-                            <td class="fw-semibold">מוקד שירות לקוחות</td>
-                            <td>דניאל לוי</td>
-                            <td><span class="badge bg-light text-dark border">4 / 4 עובדים</span></td>
-                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</button>
-                            </td>
-                        </tr>
-
-                        @* שורה 2 - חסר עובד (דחוף) *@
-                        <tr class="table-danger">
-                            <td>
-                                <div class="fw-bold text-danger">יום ראשון</div>
-                                <small class="text-danger">22/10</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-dark text-white me-1">🌙 ערב</span>
-                                <span class="fw-bold text-danger">16:00 - 00:00</span>
-                            </td>
-                            <td class="fw-bold">קופות ראשי - סניף צפון</td>
-                            <td>תומר כהן</td>
-                            <td><span class="badge bg-danger text-white">3 / 4 עובדים (חסר 1)</span></td>
-                            <td><span class="badge bg-danger-subtle text-danger fw-bold">● חסר עובד</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm btn-danger fw-semibold">שבץ עובד</button>
-                            </td>
-                        </tr>
-
-                        @* שורה 3 - מאויש מלא *@
-                        <tr>
-                            <td>
-                                <div class="fw-bold">יום שני</div>
-                                <small class="text-muted">23/10</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-primary-subtle text-primary me-1">☀️ בוקר</span>
-                                <span class="fw-semibold">08:00 - 16:00</span>
-                            </td>
-                            <td class="fw-semibold">מרחב פיקוח ובקרה</td>
-                            <td>שירה שטרן</td>
-                            <td><span class="badge bg-light text-dark border">6 / 6 עובדים</span></td>
-                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</button>
-                            </td>
-                        </tr>
-
-                        @* שורה 4 - מאויש מלא *@
-                        <tr>
-                            <td>
-                                <div class="fw-bold">יום שלישי</div>
-                                <small class="text-muted">24/10</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-info-subtle text-dark me-1">🌤️ צהריים</span>
-                                <span class="fw-semibold">12:00 - 20:00</span>
-                            </td>
-                            <td class="fw-semibold">שירות מהיר - סניף מרכז</td>
-                            <td>איתי ברנע</td>
-                            <td><span class="badge bg-light text-dark border">4 / 4 עובדים</span></td>
-                            <td><span class="badge bg-success-subtle text-success">● מאויש מלא</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm btn-outline-primary">עריכת שיבוץ</button>
-                            </td>
-                        </tr>
-
-                        @* שורה 5 - חסר עובד (דחוף) *@
-                        <tr class="table-danger">
-                            <td>
-                                <div class="fw-bold text-danger">יום רביעי</div>
-                                <small class="text-danger">25/10</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary text-white me-1">🌌 לילה</span>
-                                <span class="fw-bold text-danger">00:00 - 08:00</span>
-                            </td>
-                            <td class="fw-bold">מוקד תמיכה טכנית</td>
-                            <td>דניאל פרידמן</td>
-                            <td><span class="badge bg-danger text-white">1 / 2 עובדים (חסר 1)</span></td>
-                            <td><span class="badge bg-danger-subtle text-danger fw-bold">● חסר עובד</span></td>
-                            <td class="text-start">
-                                <button type="button" class="btn btn-sm btn-danger fw-semibold">שבץ עובד</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 }
 

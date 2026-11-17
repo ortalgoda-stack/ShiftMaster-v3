@@ -3,171 +3,320 @@
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* דף הגשת זמינות ואילוצים לעובד (Employee) - מטריצה שבועית אינטראקטיבית *@
+@* דף הגשת זמינות ואילוצים לעובד (Employee) - לוח כרטיסים שבועי אינטראקטיבי בעיצוב Stitch *@
 @if (isAuthorized)
 {
-    <div class="container-fluid py-3" dir="rtl">
+    <div class="sm-dark-landing p-3 p-md-4" dir="rtl">
+        <div class="sm-glow-blob-1"></div>
+        <div class="sm-glow-blob-2"></div>
 
-        @* כותרת דף משותפת (רכיב Shared) עם תגית תפקיד *@
-        <PageHeader Title="הגשת זמינות ואילוצים"
-                    Subtitle="סימון העדפות משמרת, שעות זמינות והגשת אילוצים אישיים לסידור העבודה הקרוב"
-                    RoleBadge="עובד מוקד" />
+        <div class="container-fluid position-relative" style="max-width: 1400px; z-index: 2;">
 
-        @* שורת כפתור חזרה לדף הבית של העובד *@
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="/employee" class="btn btn-outline-secondary rounded-3 fw-semibold">
-                → חזרה לדף הבית של העובד
-            </a>
-            <span class="badge bg-light text-secondary border px-3 py-2">
-                עובד מחובר: @(Session.Username ?? "דניאל לוי")
-            </span>
-        </div>
+            @* פס ניווט וטיימר נעילת חלון ההגשה *@
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                <div class="d-flex align-items-center gap-2 small" style="color: #c7c4d7;">
+                    <a href="/employee"
+                       class="text-decoration-none d-inline-flex align-items-center gap-1"
+                       style="color: #908fa0;">
+                        <span class="material-symbols-outlined fs-6">arrow_forward</span>
+                        <span>חזרה לדף הבית של העובד</span>
+                    </a>
+                    <span style="color: #464554;">|</span>
+                    <span style="color: #4cd7f6;">הגשת זמינות ואילוצים</span>
+                </div>
 
-        @* באנר מידע ותזכורת מועד נעילה *@
-        <div class="alert alert-primary border-0 rounded-4 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 p-3 p-md-4 mb-4">
-            <div class="d-flex align-items-center gap-3">
-                <div class="fs-3">📆</div>
-                <div>
-                    <div class="fw-bold text-primary-emphasis">
-                        הגשה עבור שבוע: 29 באוקטובר – 4 בנובמבר (שבוע 44)
+                <div class="rounded-3 px-3 py-2 d-inline-flex align-items-center gap-2 small"
+                     style="background-color: #181b25; border: 1px solid rgba(76, 215, 246, 0.25);">
+                    <span class="rounded-circle" style="width: 8px; height: 8px; background-color: #4cd7f6; box-shadow: 0 0 8px #4cd7f6;"></span>
+                    <span class="material-symbols-outlined fs-5" style="color: #4cd7f6;">timer</span>
+                    <span style="color: #c7c4d7;">חלון ההגשה נסגר בעוד:</span>
+                    <strong style="color: #4cd7f6;">3 ימים ו-14 שעות</strong>
+                    <span style="color: #908fa0;">(יום ה׳ 20:00)</span>
+                </div>
+            </div>
+
+            @* באנר כותרת ובחירת שבוע יעד *@
+            <section class="sm-dark-panel mb-4">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-4">
+                    <div>
+                        <h1 class="fw-bold text-white mb-2">הגשת זמינות ואילוצים לשבוע הבא</h1>
+                        <p class="mb-0" style="color: #c7c4d7; max-width: 680px;">
+                            בחירת ימים ומשמרות זמינות, ציון מגבלות ואילוצים מיוחדים לטובת שיבוץ מדויק על ידי מנהל המשמרת.
+                        </p>
                     </div>
-                    <small class="text-secondary">
-                        ניתן לעדכן זמינות עד <strong>יום חמישי בשעה 20:00</strong>. לאחר מכן המערכת תינעל לשיבוץ סופי.
-                    </small>
+
+                    <div class="rounded-4 px-4 py-3 d-flex align-items-center gap-3"
+                         style="background-color: #262a34; border: 1px solid rgba(192, 193, 255, 0.25);">
+                        <span class="material-symbols-outlined fs-3" style="color: #c0c1ff;">calendar_month</span>
+                        <div>
+                            <small class="d-block" style="color: #908fa0;">שבוע יעד לשיבוץ</small>
+                            <strong class="text-white">שבוע 45: 03 נובמבר - 09 נובמבר</strong>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <span class="badge bg-danger text-white fs-6 px-3 py-2 rounded-pill align-self-start align-self-md-center">
-                ⏱️ נותרו 48 שעות להגשה
-            </span>
-        </div>
+            </section>
 
-        @* הודעת אישור לאחר שליחת הטופס *@
-        @if (isSubmitted)
-        {
-            <div class="alert alert-success border-0 rounded-4 shadow-sm p-3 mb-4 fw-semibold">
-                ✅ הזמינות והאילוצים שלך לשבוע הקרוב נשמרו והוגשו בהצלחה למנהל המשמרת!
-            </div>
-        }
-
-        @* 3 כרטיסי סיכום המתעדכנים בזמן אמת *@
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-md-4">
-                <StatCard Title="משמרות שסומנו כזמינות"
-                          Value="@AvailableShiftsCount.ToString()"
-                          Subtitle="יעד מינימום שבועי: 4 משמרות"
-                          Icon="📅"
-                          ColorClass="text-primary" />
-            </div>
-            <div class="col-12 col-md-4">
-                <StatCard Title="אילוצים / ימי חופש שהוגשו"
-                          Value="@ConstraintsCount.ToString()"
-                          Subtitle="ימים שסומנו כלא זמינים"
-                          Icon="🚫"
-                          ColorClass="text-danger" />
-            </div>
-            <div class="col-12 col-md-4">
-                <StatCard Title="סטטוס טופס שבועי"
-                          Value="@(isSubmitted ? "הוגש למנהל" : "טיוטה פתוחה")"
-                          Subtitle="ניתן לעדכן עד מועד הנעילה"
-                          Icon="📝"
-                          ColorClass="@(isSubmitted ? "text-success" : "text-dark")" />
-            </div>
-        </div>
-
-        @* מטריצת ימי השבוע להגשת זמינות *@
-        <div class="sm-card p-3 p-md-4 mb-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-                <div>
-                    <h5 class="fw-bold mb-0">פירוט ימי השבוע ושיבוץ רצוי</h5>
-                    <small class="text-muted">ניתן לסמן יותר ממשמרת אחת בכל יום, או לסמן יום כאילוץ</small>
+            @* הודעת אישור לאחר שליחת הטופס *@
+            @if (isSubmitted)
+            {
+                <div class="rounded-4 p-3 mb-4 d-flex align-items-center gap-3 fw-semibold"
+                     style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6; border: 1px solid rgba(76, 215, 246, 0.4);">
+                    <span class="material-symbols-outlined fs-4">task_alt</span>
+                    <span>הזמינות והאילוצים שלך לשבוע הקרוב נשמרו והוגשו בהצלחה למנהל המשמרת!</span>
                 </div>
-            </div>
+            }
 
-            <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 150px;">יום ותאריך</th>
-                            <th>משמרת בוקר (08:00-16:00)</th>
-                            <th>משמרת ערב (16:00-00:00)</th>
-                            <th>לא זמין / אילוץ</th>
-                            <th>הערה ליום זה</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var day in weekDays)
-                        {
-                            <tr class="@(day.IsConstraint ? "table-danger" : "")">
-                                <td>
-                                    <div class="fw-bold">@day.DayName</div>
-                                    <small class="text-muted">@day.DateText</small>
-                                </td>
-                                <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               id="m-@day.DayName"
-                                               checked="@day.Morning"
-                                               disabled="@day.IsConstraint"
-                                               @onchange="(e) => ToggleMorning(day, e)" />
-                                        <label class="form-check-label small fw-semibold" for="m-@day.DayName">
-                                            ☀️ בוקר
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               id="e-@day.DayName"
-                                               checked="@day.Evening"
-                                               disabled="@day.IsConstraint"
-                                               @onchange="(e) => ToggleEvening(day, e)" />
-                                        <label class="form-check-label small fw-semibold" for="e-@day.DayName">
-                                            🌙 ערב
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               id="c-@day.DayName"
-                                               checked="@day.IsConstraint"
-                                               @onchange="(e) => ToggleConstraint(day, e)" />
-                                        <label class="form-check-label small fw-bold text-danger" for="c-@day.DayName">
-                                            🚫 אילוץ / חופש
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <input type="text"
-                                           class="form-control form-control-sm rounded-3"
-                                           placeholder="הערה אופציונלית..."
-                                           @bind="day.Note" />
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            @* הערות כלליות וכפתור הגשה *@
-            <div class="mt-4 pt-3 border-top">
-                <label class="form-label fw-semibold">הערות כלליות למנהל המשמרת (אופציונלי)</label>
-                <textarea class="form-control rounded-3 mb-3"
-                          rows="2"
-                          placeholder="לדוגמה: מעדיף לא לשבץ ערב ואחריו בוקר ברצף..."
-                          @bind="generalNotes"></textarea>
-
-                <div class="d-flex flex-wrap justify-content-end gap-2">
-                    <button type="button" class="btn sm-btn-primary px-4" @onclick="SubmitForm">
-                        📤 שמירה והגשת זמינות למנהל
-                    </button>
+            @* 4 כרטיסי KPI המתעדכנים בזמן אמת *@
+            <section class="row g-3 mb-4">
+                @* KPI 1: מינימום משמרות נדרש *@
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="sm-dark-card d-flex flex-column justify-content-between position-relative overflow-hidden">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small" style="color: #c7c4d7;">מינימום משמרות נדרש</div>
+                                <div class="fs-3 fw-bold text-white my-1">4 משמרות</div>
+                            </div>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                 style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6;">
+                                <span class="material-symbols-outlined fs-4">verified</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            @if (AvailableShiftsCount >= 4)
+                            {
+                                <span class="badge rounded-pill" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6;">
+                                    יעד הושג: @(Math.Min(AvailableShiftsCount, 4))/4 סומנו ✓
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill" style="background-color: rgba(245, 158, 11, 0.2); color: #fcd34d;">
+                                    חסרות @(4 - AvailableShiftsCount) משמרות ליעד
+                                </span>
+                            }
+                        </div>
+                        <div class="position-absolute bottom-0 start-0 end-0" style="height: 3px; background-color: #4cd7f6;"></div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
+                @* KPI 2: סך משמרות שסומנו *@
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="sm-dark-card d-flex flex-column justify-content-between position-relative overflow-hidden">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small" style="color: #c7c4d7;">סך משמרות שסומנו</div>
+                                <div class="fs-3 fw-bold my-1" style="color: #c0c1ff;">@AvailableShiftsCount משמרות</div>
+                            </div>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                 style="background-color: rgba(128, 131, 255, 0.2); color: #c0c1ff;">
+                                <span class="material-symbols-outlined fs-4">event_available</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 small" style="color: #c0c1ff;">
+                            @(AvailableShiftsCount > 4 ? $"זמינות גבוהה (+{AvailableShiftsCount - 4} מהדרוש)" : "בחירה פעילה בלוח")
+                        </div>
+                        <div class="position-absolute bottom-0 start-0 end-0" style="height: 3px; background-color: #8083ff;"></div>
+                    </div>
+                </div>
+
+                @* KPI 3: אילוצים מוגדרים *@
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="sm-dark-card d-flex flex-column justify-content-between position-relative overflow-hidden">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small" style="color: #c7c4d7;">אילוצים מוגדרים</div>
+                                <div class="fs-3 fw-bold my-1" style="color: #ffb4ab;">@ConstraintsCount אילוצים</div>
+                            </div>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                 style="background-color: rgba(147, 0, 10, 0.35); color: #ffb4ab;">
+                                <span class="material-symbols-outlined fs-4">do_not_disturb_on</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge rounded-pill" style="background-color: rgba(147, 0, 10, 0.4); color: #ffb4ab;">
+                                @(ConstraintsCount > 0 ? "ימים חסומים לשיבוץ" : "ללא אילוצים מיוחדים")
+                            </span>
+                        </div>
+                        <div class="position-absolute bottom-0 start-0 end-0" style="height: 3px; background-color: #ffb4ab;"></div>
+                    </div>
+                </div>
+
+                @* KPI 4: סטטוס הגשה אחרון *@
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="sm-dark-card d-flex flex-column justify-content-between position-relative overflow-hidden">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small" style="color: #c7c4d7;">סטטוס הגשה אחרון</div>
+                                <div class="fs-4 fw-bold my-1" style="color: @(isSubmitted ? "#4cd7f6" : "#e9ddff");">
+                                    @(isSubmitted ? "הוגש למנהל ✓" : "טיוטה נוכחית")
+                                </div>
+                            </div>
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                 style="background-color: rgba(87, 27, 193, 0.45); color: #d0bcff;">
+                                <span class="material-symbols-outlined fs-4">@(isSubmitted ? "task_alt" : "edit_document")</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 small" style="color: #908fa0;">
+                            עובד מחובר: @(Session.Username ?? "דניאל לוי")
+                        </div>
+                        <div class="position-absolute bottom-0 start-0 end-0" style="height: 3px; background-color: #571bc1;"></div>
+                    </div>
+                </div>
+            </section>
+
+            @* לוח כרטיסי 7 ימים אינטראקטיבי *@
+            <section class="sm-dark-panel">
+                @* כותרת ומקרא צבעים *@
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 pb-3 mb-4 border-bottom border-secondary border-opacity-25">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined" style="color: #c0c1ff;">view_timeline</span>
+                            <h4 class="fw-bold text-white mb-0">טופס בחירת זמינות לפי ימים</h4>
+                        </div>
+                        <small style="color: #908fa0;">לחץ על המשמרות בהן אתה פנוי לעבודה, או סמן אילוץ עבור יום שאינך זמין בו.</small>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-3 small">
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="rounded-1 d-inline-block" style="width: 12px; height: 12px; background-color: #009eb9; box-shadow: 0 0 8px #4cd7f6;"></span>
+                            <span class="text-white">זמין לעבודה</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="rounded-1 d-inline-block" style="width: 12px; height: 12px; background-color: #93000a; box-shadow: 0 0 8px #ffb4ab;"></span>
+                            <span class="text-white">אילוץ / לא זמין</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="rounded-1 d-inline-block" style="width: 12px; height: 12px; background-color: #262a34;"></span>
+                            <span style="color: #908fa0;">לא נבחר</span>
+                        </div>
+                    </div>
+                </div>
+
+                @* גריד 7 כרטיסי ימים *@
+                <div class="row g-3">
+                    @foreach (var day in weekDays)
+                    {
+                        var cardBorder = day.IsConstraint
+                            ? "border: 1px solid rgba(255, 180, 171, 0.45);"
+                            : (day.Morning || day.Evening ? "border: 1px solid rgba(76, 215, 246, 0.25);" : "border: 1px solid rgba(192, 193, 255, 0.12);");
+
+                        <div class="col-12 col-md-6 col-lg-4 col-xl">
+                            <div class="rounded-4 p-3 h-100 d-flex flex-column gap-2"
+                                 style="background-color: #1c1f29; @cardBorder">
+
+                                @* כותרת יום *@
+                                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary border-opacity-25">
+                                    <div>
+                                        <div class="fw-bold text-white">@day.DayName</div>
+                                        <small style="color: #908fa0;">@day.DateText</small>
+                                    </div>
+                                    @if (day.IsConstraint)
+                                    {
+                                        <span class="badge rounded-2" style="background-color: rgba(147, 0, 10, 0.45); color: #ffb4ab;">אילוץ</span>
+                                    }
+                                    else if (day.Morning || day.Evening)
+                                    {
+                                        <span class="badge rounded-2" style="background-color: rgba(0, 158, 185, 0.25); color: #4cd7f6;">זמין</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-2" style="background-color: #262a34; color: #908fa0;">פנוי</span>
+                                    }
+                                </div>
+
+                                @* כפתור משמרת בוקר *@
+                                <button type="button"
+                                        disabled="@day.IsConstraint"
+                                        @onclick="() => ToggleMorningClick(day)"
+                                        class="btn text-end p-2 rounded-3 w-100 border-0"
+                                        style="@(day.Morning
+                                            ? "background: linear-gradient(270deg, rgba(76,215,246,0.2) 0%, #262a34 100%); box-shadow: 0 0 12px rgba(76,215,246,0.2);"
+                                            : "background-color: #141720; opacity: " + (day.IsConstraint ? "0.4" : "0.85") + ";")">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="small fw-bold" style="color: @(day.Morning ? "#4cd7f6" : "#dfe2ef");">משמרת בוקר</span>
+                                        <span class="material-symbols-outlined fs-6" style="color: @(day.Morning ? "#4cd7f6" : "#908fa0");">
+                                            @(day.Morning ? "check_circle" : "radio_button_unchecked")
+                                        </span>
+                                    </div>
+                                    <small class="d-block" style="color: #c7c4d7; font-size: 0.72rem;">08:00 - 16:00</small>
+                                    <small class="d-block mt-1 fw-semibold" style="color: @(day.Morning ? "#4cd7f6" : "#908fa0"); font-size: 0.7rem;">
+                                        @(day.Morning ? "זמין ✓" : "לחץ לבחירה")
+                                    </small>
+                                </button>
+
+                                @* כפתור משמרת ערב *@
+                                <button type="button"
+                                        disabled="@day.IsConstraint"
+                                        @onclick="() => ToggleEveningClick(day)"
+                                        class="btn text-end p-2 rounded-3 w-100 border-0"
+                                        style="@(day.Evening
+                                            ? "background: linear-gradient(270deg, rgba(128,131,255,0.25) 0%, #262a34 100%); box-shadow: 0 0 12px rgba(128,131,255,0.25);"
+                                            : "background-color: #141720; opacity: " + (day.IsConstraint ? "0.4" : "0.85") + ";")">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="small fw-bold" style="color: @(day.Evening ? "#c0c1ff" : "#dfe2ef");">משמרת ערב</span>
+                                        <span class="material-symbols-outlined fs-6" style="color: @(day.Evening ? "#c0c1ff" : "#908fa0");">
+                                            @(day.Evening ? "check_circle" : "radio_button_unchecked")
+                                        </span>
+                                    </div>
+                                    <small class="d-block" style="color: #c7c4d7; font-size: 0.72rem;">16:00 - 00:00</small>
+                                    <small class="d-block mt-1 fw-semibold" style="color: @(day.Evening ? "#c0c1ff" : "#908fa0"); font-size: 0.7rem;">
+                                        @(day.Evening ? "זמין ✓" : "לחץ לבחירה")
+                                    </small>
+                                </button>
+
+                                @* כפתור סימון אילוץ יומי *@
+                                <button type="button"
+                                        @onclick="() => ToggleConstraintClick(day)"
+                                        class="btn text-end p-2 rounded-3 w-100 border-0"
+                                        style="@(day.IsConstraint
+                                            ? "background-color: rgba(147, 0, 10, 0.45); box-shadow: 0 0 12px rgba(255,180,171,0.2);"
+                                            : "background-color: #262a34;")">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="small fw-bold" style="color: @(day.IsConstraint ? "#ffb4ab" : "#c7c4d7");">
+                                            @(day.IsConstraint ? "אילוץ פעיל 🚫" : "סימון אילוץ")
+                                        </span>
+                                        <span class="material-symbols-outlined fs-6" style="color: @(day.IsConstraint ? "#ffb4ab" : "#908fa0");">
+                                            block
+                                        </span>
+                                    </div>
+                                </button>
+
+                                @* שדה הערה ליום *@
+                                <div class="mt-auto pt-1">
+                                    <div class="sm-dark-input-group">
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               style="font-size: 0.75rem;"
+                                               placeholder="הערה ליום זה..."
+                                               @bind="day.Note" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* הערות כלליות וכפתור שליחה *@
+                <div class="mt-4 pt-4 border-top border-secondary border-opacity-25">
+                    <label class="form-label fw-semibold text-white small">הערות כלליות למנהל המשמרת (אופציונלי)</label>
+                    <div class="sm-dark-input-group mb-3">
+                        <textarea class="form-control"
+                                  rows="2"
+                                  placeholder="לדוגמה: מעדיף לא לשבץ ערב ואחריו בוקר ברצף..."
+                                  @bind="generalNotes"></textarea>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                        <button type="button" class="sm-btn-glow px-4 py-2" @onclick="SubmitForm">
+                            <span class="material-symbols-outlined fs-5">send</span>
+                            <span>שמירה והגשת זמינות למנהל</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
     </div>
 }
 
@@ -184,13 +333,13 @@
     // רשימת ימי השבוע להגשה (נתונים סטטיים התחלתיים לדוגמה)
     private List<DayAvailability> weekDays = new()
     {
-        new("יום ראשון", "29/10", true, false, false, ""),
-        new("יום שני", "30/10", true, true, false, ""),
-        new("יום שלישי", "31/10", false, false, true, "מבחן סמסטר באוניברסיטה עד 13:00"),
-        new("יום רביעי", "01/11", true, false, false, ""),
-        new("יום חמישי", "02/11", true, true, false, ""),
-        new("יום שישי", "03/11", true, false, false, "משמרת בוקר קצרה בלבד"),
-        new("שבת", "04/11", false, false, false, "")
+        new("ראשון", "03/11", true, false, false, ""),
+        new("שני", "04/11", true, true, false, ""),
+        new("שלישי", "05/11", false, false, true, "מבחן סוף סמסטר"),
+        new("רביעי", "06/11", false, true, false, ""),
+        new("חמישי", "07/11", true, false, false, ""),
+        new("שישי", "08/11", false, false, false, "משמרת מקוצרת"),
+        new("שבת", "09/11", false, false, false, "")
     };
 
     // חישוב דינמי של כמות המשמרות הזמינות שסומנו
@@ -218,24 +367,25 @@
         isAuthorized = true;
     }
 
-    private void ToggleMorning(DayAvailability day, ChangeEventArgs e)
+    private void ToggleMorningClick(DayAvailability day)
     {
-        day.Morning = (bool)(e.Value ?? false);
+        if (day.IsConstraint) return;
+        day.Morning = !day.Morning;
         isSubmitted = false;
     }
 
-    private void ToggleEvening(DayAvailability day, ChangeEventArgs e)
+    private void ToggleEveningClick(DayAvailability day)
     {
-        day.Evening = (bool)(e.Value ?? false);
+        if (day.IsConstraint) return;
+        day.Evening = !day.Evening;
         isSubmitted = false;
     }
 
-    private void ToggleConstraint(DayAvailability day, ChangeEventArgs e)
+    private void ToggleConstraintClick(DayAvailability day)
     {
-        day.IsConstraint = (bool)(e.Value ?? false);
+        day.IsConstraint = !day.IsConstraint;
         if (day.IsConstraint)
         {
-            // אם סומן אילוץ, מנקים בחירות משמרת באותו יום
             day.Morning = false;
             day.Evening = false;
         }
